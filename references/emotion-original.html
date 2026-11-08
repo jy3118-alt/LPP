@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>원형 슬라이더</title>
+    <style>
+        @font-face {
+            font-family: 'PoVF';
+            src: url('PoVF.ttf') format('truetype');
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: radial-gradient(circle at center, rgba(0, 0, 0, 1), rgba(0, 0, 0, 1));
+            margin: 0;
+            overflow: hidden;
+            transition: background 0.2s ease; /* 배경 전환을 부드럽게 */
+        }
+
+        .center-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+
+        #fontPreview {
+            font-size: 400px;
+            font-family: 'PoVF';
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            color: #efefef;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        #slider {
+            width: 395px;
+            height: 395px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0);
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: screen;
+        }
+
+        #movingCircle {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            display: none; /* 초기에는 숨김 */
+            z-index: 1; /* 다른 요소들 위에 표시 */
+        }
+
+        .values {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 500px;
+        }
+
+        .value {
+            font-size: 18px;
+            margin: 4px 0;
+            text-align: center;
+        }
+
+        .submit-container {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .submit-button {
+            background-color: white;
+            border: none;
+            border-radius: 50px; /* 더 둥근 버튼 */
+            padding: 10px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .description {
+            position: absolute;
+            bottom: 0px; /* 슬라이더 아래로 위치 변경 */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            text-align: center;
+            color: #efefef;
+            white-space: nowrap; /* 줄바꿈 방지 */
+        }
+
+    </style>
+</head>
+<body>
+<div class="center-container">
+    <div id="fontPreview">ᄋ</div>
+    <div id="slider">
+        <div id="movingCircle"></div>
+    </div>
+    <div class="description">얼굴을 문질러 감정을 표현하세요!</div>
+    <div class="values">
+        <div class="value" id="value1">Happy: 100</div>
+        <div class="value" id="value2">Scared: 100</div>
+        <div class="value" id="value3">Surprise: 100</div>
+        <div class="value" id="value4">Sad: 100</div>
+        <div class="value" id="value5">Disgust: 100</div>
+        <div class="value" id="value6">Angry: 100</div>
+    </div>
+</div>
+
+<div class="submit-container">
+    <button class="submit-button">Submit!</button>
+</div>
+
+<script>
+    const slider = document.getElementById('slider');
+    const movingCircle = document.getElementById('movingCircle');
+    const fontPreview = document.getElementById('fontPreview');
+    const body = document.body;
+
+    const values = [
+        document.getElementById('value1'), // Happy
+        document.getElementById('value2'), // Scared
+        document.getElementById('value3'), // Surprise
+        document.getElementById('value4'), // Sad
+        document.getElementById('value5'), // Disgust
+        document.getElementById('value6')  // Angry
+    ];
+
+    const variableNames = ['Happy', 'Scared', 'Surprise', 'Sad', 'Disgust', 'Angry'];
+    const minValue = 100;
+    const maxValue = 500;
+    const radius = 140;
+
+    let isMouseDown = false; // 마우스 클릭 상태 추적
+
+    // 마우스 클릭 시작
+    slider.addEventListener('mousedown', () => {
+        isMouseDown = true;
+    });
+
+    // 마우스 클릭 해제
+    slider.addEventListener('mouseup', () => {
+        isMouseDown = false;
+        movingCircle.style.display = 'none';  // 클릭을 떼면 원형 요소 숨기기
+
+    });
+
+    // 마우스 이동
+    slider.addEventListener('mousemove', (event) => {
+        if (!isMouseDown) return; // 마우스 버튼을 누르지 않으면 값 변경 안함
+
+        const rect = slider.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const distance = Math.hypot(x - rect.width / 2, y - rect.height / 2);
+        let angle = Math.atan2(y - rect.height / 2, x - rect.width / 2) * (180 / Math.PI) + 90;
+
+        if (angle < 0) angle += 360;
+
+        updateValues(angle, distance);
+        updateMovingCircle(event, rect);
+        updateBackground(x, y, rect);
+    });
+
+
+    slider.addEventListener('mouseleave', () => {
+        movingCircle.style.display = 'none';
+    });
+
+    function updateMovingCircle(event, rect) {
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+        movingCircle.style.display = 'block';
+        movingCircle.style.left = `${mouseX - movingCircle.offsetWidth / 2}px`;
+        movingCircle.style.top = `${mouseY - movingCircle.offsetHeight / 2}px`;
+    }
+
+    function updateValues(angle, distance) {
+        const valuesArray = new Array(6).fill(minValue);
+        const normalizedDistance = Math.min(distance, radius) / radius;
+
+        const angleRanges = [
+            { start: 0, end: 60, vars: [0, 1] },
+            { start: 60, end: 120, vars: [1, 2] },
+            { start: 120, end: 180, vars: [2, 3] },
+            { start: 180, end: 240, vars: [3, 4] },
+            { start: 240, end: 300, vars: [4, 5] },
+            { start: 300, end: 360, vars: [5, 0] }
+        ];
+
+        for (let range of angleRanges) {
+            if (angle >= range.start && angle < range.end) {
+                const [var1, var2] = range.vars;
+                const ratio = (angle - range.start) / (range.end - range.start);
+                valuesArray[var1] = minValue + (maxValue - minValue) * (1 - ratio) * normalizedDistance;
+                valuesArray[var2] = minValue + (maxValue - minValue) * ratio * normalizedDistance;
+                break;
+            }
+        }
+
+        updateDisplay(valuesArray);
+    }
+
+    function updateDisplay(valuesArray) {
+        for (let i = 0; i < variableNames.length; i++) {
+            values[i].innerText = `${variableNames[i]}: ${Math.round(valuesArray[i])}`;
+        }
+        updateFontPreview(valuesArray);
+    }
+
+    function updateFontPreview(valuesArray) {
+        fontPreview.style.fontVariationSettings = `
+            'wdth' ${Math.round(valuesArray[0])},
+            'ital' ${Math.round(valuesArray[1])},
+            'slnt' ${Math.round(valuesArray[2])},
+            'opsz' ${Math.round(valuesArray[3])},
+            'yopq' ${Math.round(valuesArray[4])},
+            'wght' ${Math.round(valuesArray[5])}
+        `;
+    }
+            function handleSubmit() {
+        alert('Thanks!');
+    }
+
+    function updateBackground(x, y, rect) {
+        const xPercent = Math.min(100, Math.max(0, (x / rect.width) * 100));
+        const yPercent = Math.min(100, Math.max(0, (y / rect.height) * 100));
+        const hue1 = Math.round((xPercent / 100) * 360);
+
+        body.style.background = `
+            radial-gradient(circle at ${xPercent}% ${yPercent}%, 
+            hsl(${hue1}, 80%, 10%) 10%, 
+            rgba(0, 0, 0, 1) 80%)
+        `;
+    }
+    document.querySelector('.submit-button').addEventListener('click', handleSubmit);
+    document.addEventListener('DOMContentLoaded', () => {
+    // 페이지가 로드되었을 때 기본값을 설정 (초기값: 100)
+    const initialValues = Array(6).fill(minValue); // 기본값 100
+    updateDisplay(initialValues); // 기본값을 화면에 반영
+});
+</script>
+</body>
+</html>

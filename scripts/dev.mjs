@@ -1,0 +1,10 @@
+import http from 'node:http';
+import {Readable} from 'node:stream';
+import {readFile,readdir} from 'node:fs/promises';
+import worker from '../dist/server/index.js';
+import {LocalBucket} from './local-bucket.mjs';
+const bucket=await new LocalBucket('.local-r2').init();
+for(const file of await readdir('web/fonts'))if(file.endsWith('.woff'))await bucket.put('app-assets/fonts/'+file,await readFile('web/fonts/'+file),{httpMetadata:{contentType:'font/woff'}});
+const env={BUCKET:bucket,LPP_SERVICE_KEY:'local-development-only'};
+const server=http.createServer(async(req,res)=>{try{const url='http://127.0.0.1:4173'+req.url,headers=new Headers(req.headers);headers.set('oai-authenticated-user-id','local-lpp-owner');const request=new Request(url,{method:req.method,headers,...(!['GET','HEAD'].includes(req.method)?{body:Readable.toWeb(req),duplex:'half'}:{})});const response=await worker.fetch(request,env);res.writeHead(response.status,Object.fromEntries(response.headers));if(response.body)Readable.fromWeb(response.body).pipe(res);else res.end()}catch(error){console.error(error.message);res.writeHead(500);res.end('Local preview error.')}});
+server.listen(4173,'127.0.0.1',()=>console.log('LPP preview http://127.0.0.1:4173 (local storage and local sign-in only)'));

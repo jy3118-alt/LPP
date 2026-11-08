@@ -1,47 +1,67 @@
-# LPP — Private Press (Web)
+# LPP — Private Press
 
-아이폰 Safari에서 주소를 열어 쓰는 개인용 레코드 플레이어 PWA. 기존 소장 사이트를 같은 주소에서 업데이트해 IndexedDB 음악 데이터를 유지합니다. 웹뷰나 Xcode 설치, 앱 서명은 필요 없습니다. 기존 네이티브 프로젝트는 상위 LPP 폴더에 보존되어 있습니다.
+A private iPhone-first music player with living ink typography, ten audio-reactive grooves and a PoVF feeling recorder. The interface is English. The existing Sites project and origin are preserved.
 
-## 사용
-1. 배포 주소를 Safari에서 열고 본인의 ChatGPT 계정으로 로그인합니다. 사이트는 소유자만 접속할 수 있도록 유지합니다.
-2. 원하면 공유 → 홈 화면에 추가. 홈 화면의 LPP를 연 뒤 음악을 가져오는 것을 권장합니다.
-3. 레코드 가져오기 → 파일 앱의 음악 선택. 파일은 서버로 전송하지 않고 IndexedDB에 저장됩니다.
-4. 처음 둘러볼 때는 예시 레코드 들어보기. 직접 합성한 18초 WAV가 들어 있습니다.
-5. 설정의 ‘지글지글 움직임’으로 글자와 아이콘 모션을 켜고 끕니다.
+## Use on an iPhone
+1. Open the deployed address in Safari and sign in with the owner's ChatGPT account.
+2. Optionally use Share → Add to Home Screen, then open LPP there.
+3. Import records → Files. Uploads go to the private server shelf and appear on the owner's other devices without another deployment.
+4. Pick a record to play. The face beside the heart opens the feeling recorder.
+5. Rub/drag the face, then Save. Every save appends a separate impression.
+6. Settings → Feelings → History provides CSV and JSON exports. Record details also shows that record's history.
+7. Record details → Offline → Download saves a device copy for offline listening.
 
-## 디자인과 폰트
-- 딥 블랙 #050505, 네온 오렌지 #FF5A00, 아이보리 #EDE7D8.
-- LP 재킷 그리드, 회전하는 바이닐, 움직이는 톤암.
-- LPP 전용 SVG 아이콘에 서로 다른 네 잉크 프레임과 작은 위치 변화를 적용해 실제로 떨리도록 구현했습니다.
-- 전 텍스트에 이전에 제작한 Noto Serif KR 기반 Open Cosmos Ink KR Full 가변 폰트를 적용했습니다. 한글 11,172자, 기본 영문, 호환 자모, 포함된 구두점을 지원합니다. 출처 폰트의 BOIL 축 0–3을 단계적으로 바꿉니다. 원본 폰트는 수정하지 않고 WOFF 서브셋으로 패키징했습니다.
-- 폰트 라이선스와 원저작권은 dist/fonts/OFL.txt에 포함합니다.
-- 원본 폰트에서 지원하지 않는 외국 문자/기호는 브라우저 대체 글꼴로 표시될 수 있습니다. 기본 레이블에서는 지원 글자를 사용하고 버튼 아이콘은 SVG로 표시합니다.
-- 시스템의 동작 줄이기를 존중하며, 문서가 백그라운드로 이동하면 글자와 아이콘 애니메이션을 일시정지합니다.
+## Storage and access
+- Cloudflare R2, provisioned by Sites as `BUCKET`, stores music, sleeve artwork, record metadata, font binaries and append-only feeling records. Music is not committed to Git or embedded in the Worker.
+- The Site remains owner-private. The backend checks the dispatch-owned authenticated user header and binds the library to the first signed-in owner. Other identities are rejected. The initial setup runs only while access remains owner-private.
+- Service imports require both the Sites service-access gate and a separate runtime secret `LPP_SERVICE_KEY`. The secret is stored in Sites, never in source or the frontend.
+- Browser IndexedDB `sojang-music` version 2 holds device downloads, cached library metadata, and an offline feeling outbox. Legacy local records are preserved and can be uploaded from their details.
+- Raw uploads are SHA-256 verified by R2 and deduplicated by their content hash. Maximum audio file size is 50 MB. Files stream with HTTP Range support.
+- Conditional R2 writes protect record metadata against lost concurrent edits. Feeling IDs make retries idempotent.
+- Removing a song removes its server audio and current metadata. Historical feeling records keep their song/title/artist/checksum snapshots.
+- Browser cleanup or app removal can erase offline downloads and pending unsynced feelings. Keep original audio files. Server records require the hosting service/account to remain available.
 
-## 저장과 오프라인
-- 소장 시절의 sojang-music IndexedDB 및 tracks 스토어를 보존합니다.
-- 음악과 커버는 기기/브라우저별로 보관되며 자동 동기화되지 않습니다.
-- 서비스 워커가 앱과 전체 폰트 파일을 백그라운드로 준비합니다. 폰트 전체는 약 18.5 MB이며 처음에는 연결이 필요합니다. 설정에서 오프라인 준비 상태를 표시합니다.
-- 캐시 갱신은 이전 음악 데이터베이스에 손대지 않습니다.
-- Safari 데이터 삭제, 홈 화면 앱 삭제, 기기의 공간 정리로 음악이 사라질 수 있으니 원본은 별도로 보관하세요.
-- 잠금 화면/백그라운드 연속 재생 및 설치 앱의 오프라인 실행은 실제 iOS/Safari 환경에 따라 다릅니다. 실제 아이폰에서 비행기 모드와 잠금 화면 재생 확인이 필요합니다.
+## Feeling model
+The original confirmed PoVF circular mapping is retained: clockwise from the top, Happy → Scared → Surprise → Sad → Disgust → Angry. Direction mixes adjacent axes and radial distance controls intensity. Neutral is at the center. Each original axis ranges 100–500.
 
-## 검증
-브라우저에서 390×844 모바일 화면, 가로 넘침 없음, 전체 텍스트의 LPP Ink 글꼴 적용, BOIL 축의 실제 변화, 아이콘 프레임 변화, 설정으로 움직임 중단 및 글꼴/아이콘 정지, WAV 재생(18초), 기존 보관함·좋아요 데이터 읽기, 검색 빈 결과, 앱 파일 오프라인 준비 완료 표시를 확인했습니다. JavaScript 구문 확인을 통과했습니다. 실제 아이폰 하드웨어에서의 재생 지속성은 검증하지 않았습니다.
+PoVF axes: Happy=wdth, Scared=ital, Surprise=slnt, Sad=opsz, Disgust=yopq, Angry=wght. `web/emotion-model.js` is shared by the browser and backend. The backend recomputes values from coordinates; it does not trust submitted emotion labels.
 
-## 로컬 실행
-`python3 -m http.server 4173 --directory dist`
+Fixed category colors:
+- Neutral #9B9B9B
+- Happy #FFD34E
+- Scared #AA7DFF
+- Surprise #67D9FF
+- Sad #5587FF
+- Disgust #8BCC58
+- Angry #FF5757
 
-## Reactive grooves / English UI update
-The player now renders ten concentric rough rings using Canvas and projects their 3D coordinates into the screen. A Web Audio analyser reads the existing audio element locally: RMS controls intensity, low-frequency energy controls depth, mid/high frequency bands shape the contours, and spectral centroid/flatness/flux control color and jitter. This is frequency-based audio reactivity, not musical-note or instrument recognition. The visual pauses when hidden and becomes a static impression when motion is off. No microphone access is used. The direct audio destination connection remains separate from the analysis branch.
+Every impression includes schema/mapping version, event ID, record ID and checksum, title/artist/filename snapshot, client occurrence time and server receipt time, playback time/duration, X/Y/angle/intensity, all six raw and normalized emotion values, PoVF axes, dominant category, blended label and color. These are user annotations, not automatic emotion inference. CSV/JSON exports remain private to the owner. UTC ISO timestamps are retained; the history UI displays English dates in Asia/Seoul.
 
-All product copy is English. Imported titles and artist names retain the user's original text. Explanatory paragraphs, slogans, technical captions and long setup text have been removed from the main flow. Settings uses short rows; Home Screen setup has three steps.
+The user confirmed the existing `Portpolio/public/interaction/emojition` copies as the intended reference when the originally supplied Downloads path was unavailable. The reference HTML is preserved under `references/`; only the needed mapping and PoVF font are integrated into the player.
 
-## Lock-screen playback improvement
-The audible HTML audio element is now independent of Web Audio. Visualization reads a synchronized, silent analysis element through an analyser and a zero-gain output. When the page is hidden only the analysis copy and visual rendering pause. The actual music element keeps its native playback route. The supported Audio Session API is set to playback and Media Session playback state follows the audible element. Analysis startup no longer blocks music playback. This improves resilience to iOS suspending AudioContext; actual iPhone lock-screen and next-track behavior still require physical-device testing.
+## Sound and visuals
+Actual music plays through a native HTML audio element. A synchronized silent analysis copy runs through Web Audio with zero output gain, so suspending visual analysis does not route the audible music through AudioContext. Supported Audio Session playback mode and Media Session controls are configured. Analysis pauses offscreen.
 
-## Smooth depth update
-The main reactive record no longer quantizes the rough contour into ink frames. Continuous phase, spatial waveform averaging, low-pass feature envelopes, per-point contour/depth smoothing and eased color produce continuous motion. Icon and type boiling are unchanged. A stable camera shows actual Z displacement of the ten ring layers; amplitude no longer acts primarily by tilting the camera. The silent analysis copy also resets the prior spectrum on track changes.
+Ten rough rings react to amplitude, frequency balance and spectral texture. Their actual per-layer Z coordinates create front/back depth through perspective projection. Continuous phase, waveform averaging and temporal smoothing avoid stepped motion. Idle outlines keep gently moving without music. The camera center remains anchored to the record position, while the pointer-transparent drawing surface spans the viewport to avoid clipping. Colors stay in an orange/amber/ember palette.
 
-## Idle ink
-The ten grooves keep a subtle, continuous outline boil when no music is playing. Music adds the larger depth, contour and color response. Hidden pages and Motion Off still stop the idle animation. Production hosting is already configured through Sites; a GitHub account or repository is not required to use or update this deployment.
+All interface text uses the previously created Noto Serif KR derivative Open Cosmos Ink KR Full with its BOIL axis. The PoVF font is used only for faces. Open Cosmos Ink supports all 11,172 modern Hangul syllables plus its included Latin, jamo and punctuation. Its original SIL OFL notice is in `web/fonts/OFL.txt`.
+
+## Source and deployment
+- `web/`: authored frontend and font files.
+- `worker/index.js`: authenticated server routes, R2 access, streaming and exports.
+- `scripts/build.mjs`: embeds the small app assets and emits an ES-module Worker under `dist/server/`. Large font binaries are seeded separately into R2.
+- `.openai/hosting.json`: existing Site identity, R2 binding and no D1 database.
+- `scripts/seed-private.py`: reads import credentials through hidden stdin; imports only explicitly supplied files and allowlisted font assets.
+- `scripts/dev.mjs` and `scripts/local-bucket.mjs`: local-only R2 adapter and simulated owner identity. They are not included in the production Worker.
+- `test/shelf.test.mjs`: authorization, upload/deduplication, range streaming, edits/deletes, service asset restrictions, emotion mapping and append-only export tests.
+
+Build: `node scripts/build.mjs`
+Test: `node --test test/*.test.mjs`
+Local preview: `node scripts/dev.mjs`
+
+Publish using the Sites source/package workflow and owner-private deployment. GitHub is not required. Hosting is subject to the account's current service limits and billing policy.
+
+## Verification and limits
+Passed backend tests and JavaScript syntax checks. Browser QA verified actual M4A streaming, file-chooser upload to the server shelf, drag/keyboard emotion selection, private save/history, CSV/JSON routes, mobile layout and fixed category color application. Local test records and feelings remain in ignored `.local-r2/` and are not deployed. The five supplied songs are imported into production separately after deployment.
+
+Actual iPhone hardware, lock-screen continuation, long background sessions, interrupted phone calls, and offline Home Screen behavior still require device testing. The silent analysis stream adds an extra decoder only while the app is visible and motion is enabled.

@@ -47,3 +47,36 @@ html[data-motion=off],html[data-motion=off] .glyph,html[data-motion=off] .ink-fr
 .install-steps{margin:20px 0 4px;padding-left:22px}
 .install-steps li{padding:12px 0;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink)}
 @media(max-width:650px){.intro{padding:20px 21px}.hero-content{min-height:138px;gap:6px}.intro h1{font-size:28px;margin:0 0 20px}.hero-art{width:112px;max-width:34%;margin:0 -5px 0 0}.hero-content .primary{font-size:10px;padding:10px 12px}.hero-content>div:first-child{max-width:70%}.empty{padding:30px 5px}.help-button{font-size:8px;max-width:100px}.player-open .turntable{margin-top:3px}.player-open .now-title{margin-top:0}.player-open .volume{margin-bottom:25px}.now-panel .now-heading{font-size:10px;letter-spacing:1px}}
+
+.upload-state{color:var(--accent);font-size:10px}.collection-actions:has(.upload-state:not([hidden])) #collection-info{display:none}.upload-state:not([hidden]){animation:upload-pulse 1s ease-in-out infinite alternate}@keyframes upload-pulse{to{opacity:.5}}
+@font-face{font-family:'LPP Po';src:url('fonts/PoVF.ttf') format('truetype');font-display:block;font-weight:100 500;font-style:normal}
+.povf-face{font-family:'LPP Po'!important;font-synthesis:none;font-variation-settings:'wdth' 100,'ital' 100,'slnt' 100,'opsz' 100,'yopq' 100,'wght' 100;animation:none!important;line-height:1}
+.feel-button{display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #38382f;color:var(--ink);border-radius:30px;padding:8px 18px;margin:23px auto 0;font-size:11px;min-height:43px}.feel-button .povf-face{font-size:29px;display:block;width:26px;height:26px;line-height:26px}
+.emotion-dialog{max-width:420px;padding:27px 23px}.feeling-heading h2{font-size:24px;margin-top:10px}.feeling-record{display:block;font-size:11px;color:var(--accent);padding-right:16px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.emotion-wheel{width:100%;aspect-ratio:1;position:relative;margin:23px auto 16px;max-width:330px}.emotion-pad{position:absolute;inset:9%;border-radius:50%;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;outline:1px solid #38382f;background:radial-gradient(circle,hsl(var(--emotion-hue,20) 60% 13%),#080808 72%);overflow:hidden}.emotion-pad:active{cursor:grabbing}.emotion-pad:focus-visible{outline:2px solid var(--accent);outline-offset:5px}.emotion-pad .povf-face{position:absolute;width:100%;text-align:center;left:50%;top:50%;transform:translate(-50%,-50%);font-size:236px;color:var(--ink);pointer-events:none}
+#emotion-handle{position:absolute;left:calc(50% - 11px);top:calc(50% - 11px);width:22px;height:22px;border-radius:50%;border:1px solid var(--accent);background:#ff5a0022;pointer-events:none;box-shadow:0 0 14px #ff5a0033}
+.emotion-direction{position:absolute;font-size:8px;color:#8d8d82;z-index:2;pointer-events:none;transform:translate(-50%,-50%)}.direction-0{left:50%;top:1%}.direction-1{left:94%;top:25%}.direction-2{left:94%;top:75%}.direction-3{left:50%;top:99%}.direction-4{left:6%;top:75%}.direction-5{left:6%;top:25%}.emotion-choice{text-align:center;font-size:16px;color:var(--ink);min-height:49px}.emotion-strength{width:100px;height:2px;margin:13px auto 0;background:#35352c;overflow:hidden}.emotion-strength i{display:block;height:2px;border-radius:0;width:0;background:var(--accent)}.feeling-actions{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:24px}.feeling-actions .primary{padding:12px 20px}.feeling-actions .text-button{padding-left:0}.feeling-list{font-size:12px;color:var(--muted);line-height:1.8;max-height:50dvh;overflow:auto}.feeling-entry{display:flex;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid var(--line)}.feeling-entry .feeling-mini{font-size:54px;display:block;width:58px;flex-shrink:0;color:var(--accent)}.feeling-entry strong{font-weight:400;color:var(--ink);font-size:13px}.feeling-entry span:not(.povf-face){display:block;font-size:11px}.feeling-entry small{display:block;font-size:9px;color:#77776c;margin-top:5px}.feeling-exports{display:flex;gap:20px;margin:15px 0}.feeling-exports .text-button{padding-left:0}.feeling-count{color:var(--accent);font-size:8px;display:block;margin-top:7px}
+@media(max-width:650px){.player-open .feel-button{margin-top:15px}.player-open .volume{margin-top:16px;margin-bottom:15px}.emotion-pad .povf-face{font-size:215px}.emotion-wheel{margin-top:19px}}
+@media(prefers-reduced-motion:reduce){.povf-face{transition:none!important}}
+/* Feeling is a face beside the heart; the input is centered and unframed. */
+.feel-icon{color:#9b9b9b;width:39px;height:44px}
+.feel-icon .povf-face{display:block;font-size:27px;line-height:1;width:27px;height:27px;letter-spacing:0;transform:translateY(-.1em)}
+.now-title .feel-icon{color:#9b9b9b}
+.emotion-dialog{text-align:center;padding-top:33px;padding-bottom:29px}
+.feeling-heading h2{text-align:center;font-size:25px;margin:4px 0 16px}
+.emotion-wheel{width:100%;max-width:310px;margin:12px auto 17px}
+.emotion-pad{inset:0;outline:none!important;background:none;overflow:visible;border-radius:0}
+.emotion-pad:focus-visible{box-shadow:inset 0 0 0 1px #45453d;border-radius:10px}
+.emotion-pad .povf-face{font-size:260px;top:50%;left:50%;transform:translate(-50%,-60%);letter-spacing:0;line-height:1;width:100%;transition:color .15s ease}
+#emotion-handle{width:16px;height:16px;left:calc(50% - 8px);top:calc(50% - 8px);background:#ffffff12;box-shadow:none;opacity:0}
+.emotion-pad:active #emotion-handle{opacity:.8}
+.emotion-direction,.emotion-strength{display:none}
+.emotion-choice{text-align:center;min-height:28px;font-size:17px}
+.feeling-actions{justify-content:center;margin-top:23px}
+.feeling-actions .primary{min-width:134px;padding:12px 25px;transition:background-color .15s ease}
+@media(max-width:650px){.emotion-dialog{padding:31px 24px 27px}.emotion-wheel{max-width:290px}.emotion-pad .povf-face{font-size:clamp(215px,65vw,250px)}.feeling-heading h2{font-size:24px}.now-title h2{font-size:23px}.now-title .icon{width:35px}.now-title .feel-icon{width:35px}}
+
+.feel-icon .povf-face{-webkit-text-stroke:.3px currentColor}
+#reactive-record{position:fixed;inset:0;width:100vw;height:100dvh;aspect-ratio:auto;pointer-events:none;z-index:51;display:block}
+@media(max-width:930px){#reactive-record{display:none}.player-open #reactive-record{display:block}}
+.feeling-heading h2{margin-bottom:0}
+.feel-instruction{font-family:'LPP Ink',serif!important;font-size:11px!important;line-height:1.8!important;color:#97978b!important;margin:9px 0 13px!important;text-align:center}

@@ -1,0 +1,7 @@
+.local-r2/
+.local-env
+node_modules/
+outputs/
+.env*
+.dev.vars*
+.sites-runtime/

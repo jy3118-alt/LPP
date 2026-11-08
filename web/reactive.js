@@ -5,6 +5,8 @@
   const audio=document.querySelector('#audio');
   const canvases=[document.querySelector('#reactive-record'),document.querySelector('#mini-reactive')].filter(Boolean);
   const main=canvases[0],status=document.querySelector('#reactive-state');
+  if(main)document.body.append(main);
+  const anchor=document.querySelector('#cover');
   let context,source,analyser,probe,silentOutput,bins,wave,previous,frame=0,lastTime=0,phase=0,visible=!document.hidden;
   let startingProbe=null;
   let energy=0,bass=0,mid=0,high=0,brightness=0,texture=0,flux=0,hue=20,metricsTime=0;
@@ -83,7 +85,9 @@
   function draw(canvas,small){
     if(!canvas.clientWidth||!canvas.clientHeight)return;
     const width=canvas.width,height=canvas.height,ctx=canvas.getContext('2d');if(!ctx)return;
-    ctx.clearRect(0,0,width,height);ctx.save();ctx.scale(width/320,height/320);
+    ctx.clearRect(0,0,width,height);ctx.save();
+    if(small)ctx.scale(width/320,height/320);
+    else{const rect=anchor.getBoundingClientRect();if(!rect.width||!rect.height){ctx.restore();return}const dpr=width/canvas.clientWidth;ctx.scale(dpr,dpr);ctx.translate(rect.left+rect.width/2,rect.top+rect.height/2);ctx.scale(rect.width/320,rect.width/320);ctx.translate(-160,-160)}
     const active=motion(),e=active?energy:0,b=active?bass:0,m=active?mid:0,h=active?high:0,t=active?texture:0;
     // A stable oblique camera makes front/back separation readable.
     // Z is actual per-layer depth below, not an amplitude-driven tilt.
@@ -94,8 +98,8 @@
     let contour=contours.get(canvas);if(!contour){contour={radius:new Float32Array(10*(points+1)),depth:new Float32Array(10*(points+1))};for(let layer=0;layer<10;layer++)for(let j=0;j<=points;j++)contour.radius[layer*(points+1)+j]=13+layer*10.8;contours.set(canvas,contour)}
     for(let layer=0;layer<10;layer++){
       const radius=13+layer*10.8,band=active?layers[layer]:0;
-      const strokeHue=active?hue+(layer-4.5)*(5+brightness*24+t*20):20;
-      ctx.strokeStyle=`hsl(${strokeHue.toFixed(1)} 100% ${50+layer*.35+e*2}%)`;
+      const strokeHue=active?clamp(hue+(layer-4.5)*.75+brightness*1.5,8,34):21;
+      ctx.strokeStyle=`hsl(${strokeHue.toFixed(1)} 100% ${47+layer*.65+e*2}%)`;
       ctx.lineWidth=small?3.7:2.1+e*1.9+flux*1.5;
       ctx.lineJoin='round';ctx.lineCap='round';
       ctx.beginPath();
@@ -121,7 +125,7 @@
     ctx.restore();
     if(canvas===main){canvas.dataset.layers='10';canvas.dataset.flow=phase.toFixed(4);canvas.dataset.hue=hue.toFixed(1);canvas.dataset.energy=energy.toFixed(4);canvas.dataset.bass=bass.toFixed(4);canvas.dataset.high=high.toFixed(4);canvas.dataset.texture=texture.toFixed(4);canvas.dataset.rotationX=rx.toFixed(4);canvas.dataset.rotationY=ry.toFixed(4);canvas.dataset.depth=((12+40*b+24*m)*e*4.5).toFixed(3)}
   }
-  function resize(){for(const canvas of canvases){const size=canvas.clientWidth;if(!size)continue;const dpr=Math.min(devicePixelRatio||1,1.8);canvas.width=canvas.height=Math.round(size*dpr)}paint()}
+  function resize(){for(const canvas of canvases){const width=canvas.clientWidth,height=canvas.clientHeight;if(!width||!height)continue;const dpr=Math.min(devicePixelRatio||1,1.8);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr)}paint()}
   function paint(){canvases.forEach(canvas=>draw(canvas,canvas.id==='mini-reactive'))}
   function loop(now){
     frame=0;if(!visible)return;
@@ -131,7 +135,7 @@
     const target=motion()?analyse():{energy:0,bass:0,mid:0,high:0,brightness:0,texture:0,flux:0};
     energy=lerp(energy,target.energy,.16);bass=lerp(bass,target.bass,.14);mid=lerp(mid,target.mid,.14);high=lerp(high,target.high,.12);brightness=lerp(brightness,target.brightness,.12);texture=lerp(texture,target.texture,.12);flux=lerp(flux,target.flux,.14);
     for(let i=0;i<10;i++)layers[i]=lerp(layers[i],motion()?targetLayers[i]:0,.12);
-    hue=lerp(hue,20+brightness*650+texture*120+flux*140,.07);
+    hue=lerp(hue,21-brightness*10+bass*8+flux*2,.07);
     if(motion())phase+=dt*(1.1+energy*4+flux*5);
     paint();
     if(now-metricsTime>250){metricsTime=now;if(status)status.textContent=audio.paused?'READY TO RESONATE':!analyser?'A QUIET IMPRESSION':motion()?'SHAPED BY YOUR SOUND':'A STILL IMPRESSION'}
@@ -142,6 +146,7 @@
   document.addEventListener('visibilitychange',()=>{visible=!document.hidden;if(!visible){cancelAnimationFrame(frame);frame=0;probe?.pause()}else{playbackSession();if(!audio.paused)startProbe();kick()}});
   new ResizeObserver(resize).observe(document.querySelector('.now-panel'));
   new ResizeObserver(resize).observe(document.querySelector('#open-player'));
+  window.addEventListener('resize',resize);
   window.LPPVisuals={unlock,motionChanged(){if(motion()&&!audio.paused)startProbe();else probe?.pause();kick();paint()}};
   resize();kick();
 })();
