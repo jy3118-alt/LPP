@@ -42,3 +42,6 @@ The audible HTML audio element is now independent of Web Audio. Visualization re
 
 ## Smooth depth update
 The main reactive record no longer quantizes the rough contour into ink frames. Continuous phase, spatial waveform averaging, low-pass feature envelopes, per-point contour/depth smoothing and eased color produce continuous motion. Icon and type boiling are unchanged. A stable camera shows actual Z displacement of the ten ring layers; amplitude no longer acts primarily by tilting the camera. The silent analysis copy also resets the prior spectrum on track changes.
+
+## Idle ink
+The ten grooves keep a subtle, continuous outline boil when no music is playing. Music adds the larger depth, contour and color response. Hidden pages and Motion Off still stop the idle animation. Production hosting is already configured through Sites; a GitHub account or repository is not required to use or update this deployment.

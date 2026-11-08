@@ -105,7 +105,7 @@
         let sample=0;if(wave){const center=(Math.floor(j/points*wave.length)+layer*41)%wave.length;for(let offset=-8;offset<=8;offset++)sample+=wave[(center+offset+wave.length)%wave.length];sample/=17}
         const ripple=Math.sin(angle*(3+layer%4)+phase*(2+h*9)+layer)*band*(10+e*75)+sample*e*95+Math.sin(angle*7-phase*3+layer)*flux*13;
         const index=layer*(points+1)+j;
-        const targetRadius=Math.max(5,radius*(1+e*.12+flux*.13)+rough*(1+t*8+flux*5)+ripple);
+        const targetRadius=Math.max(5,radius*(1+e*.12+flux*.13)+rough*(1+t*8+flux*5)+ripple+Math.sin(angle*5+flow*.7+layer*.5)*.55);
         const r=active?(contour.radius[index]=lerp(contour.radius[index],targetRadius,.16)):targetRadius;
         let x=Math.cos(angle)*r+Math.sin(phase*1.2+layer*.42)*e*(4+band*13),y=Math.sin(angle)*r+Math.cos(phase*.9+layer*.35)*e*(4+b*12);
         const targetZ=((layer-4.5)*(12+40*b+24*m)+Math.sin(angle*3+flow*1.1+layer*.4)*m*46+Math.sin(angle*7+flow*1.7)*t*35)*e;
@@ -119,7 +119,7 @@
       if(!small){ctx.save();ctx.globalAlpha=.32;ctx.lineWidth=.65;ctx.translate(.7,-.45);ctx.stroke();ctx.restore()}
     }
     ctx.restore();
-    if(canvas===main){canvas.dataset.layers='10';canvas.dataset.hue=hue.toFixed(1);canvas.dataset.energy=energy.toFixed(4);canvas.dataset.bass=bass.toFixed(4);canvas.dataset.high=high.toFixed(4);canvas.dataset.texture=texture.toFixed(4);canvas.dataset.rotationX=rx.toFixed(4);canvas.dataset.rotationY=ry.toFixed(4);canvas.dataset.depth=((12+40*b+24*m)*e*4.5).toFixed(3)}
+    if(canvas===main){canvas.dataset.layers='10';canvas.dataset.flow=phase.toFixed(4);canvas.dataset.hue=hue.toFixed(1);canvas.dataset.energy=energy.toFixed(4);canvas.dataset.bass=bass.toFixed(4);canvas.dataset.high=high.toFixed(4);canvas.dataset.texture=texture.toFixed(4);canvas.dataset.rotationX=rx.toFixed(4);canvas.dataset.rotationY=ry.toFixed(4);canvas.dataset.depth=((12+40*b+24*m)*e*4.5).toFixed(3)}
   }
   function resize(){for(const canvas of canvases){const size=canvas.clientWidth;if(!size)continue;const dpr=Math.min(devicePixelRatio||1,1.8);canvas.width=canvas.height=Math.round(size*dpr)}paint()}
   function paint(){canvases.forEach(canvas=>draw(canvas,canvas.id==='mini-reactive'))}
@@ -132,10 +132,10 @@
     energy=lerp(energy,target.energy,.16);bass=lerp(bass,target.bass,.14);mid=lerp(mid,target.mid,.14);high=lerp(high,target.high,.12);brightness=lerp(brightness,target.brightness,.12);texture=lerp(texture,target.texture,.12);flux=lerp(flux,target.flux,.14);
     for(let i=0;i<10;i++)layers[i]=lerp(layers[i],motion()?targetLayers[i]:0,.12);
     hue=lerp(hue,20+brightness*650+texture*120+flux*140,.07);
-    if(energy>.001)phase+=dt*(.35+energy*4+flux*5);
+    if(motion())phase+=dt*(1.1+energy*4+flux*5);
     paint();
     if(now-metricsTime>250){metricsTime=now;if(status)status.textContent=audio.paused?'READY TO RESONATE':!analyser?'A QUIET IMPRESSION':motion()?'SHAPED BY YOUR SOUND':'A STILL IMPRESSION'}
-    if(!audio.paused&&motion()||energy>.001)frame=requestAnimationFrame(loop);
+    if(motion()||energy>.001)frame=requestAnimationFrame(loop);
   }
   function kick(){if(!frame&&visible){lastTime=performance.now();frame=requestAnimationFrame(loop)}}
   audio.addEventListener('play',()=>{playbackSession();startProbe();kick()});audio.addEventListener('pause',()=>{probe?.pause();kick()});audio.addEventListener('ended',()=>{probe?.pause();kick()});audio.addEventListener('seeked',()=>{alignProbe();if(!audio.paused)startProbe();kick()});audio.addEventListener('ratechange',alignProbe);
@@ -143,5 +143,5 @@
   new ResizeObserver(resize).observe(document.querySelector('.now-panel'));
   new ResizeObserver(resize).observe(document.querySelector('#open-player'));
   window.LPPVisuals={unlock,motionChanged(){if(motion()&&!audio.paused)startProbe();else probe?.pause();kick();paint()}};
-  resize();
+  resize();kick();
 })();
