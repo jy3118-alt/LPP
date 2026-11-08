@@ -5,3 +5,5 @@ outputs/
 .env*
 .dev.vars*
 .sites-runtime/
+
+.wrangler/

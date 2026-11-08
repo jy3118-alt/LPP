@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lpp-private-press",
+  "main": "worker/standalone.js",
+  "compatibility_date": "2026-11-08",
+  "workers_dev": true,
+  "preview_urls": false,
+  "r2_buckets": [{"binding": "BUCKET", "bucket_name": "lpp-private-records"}],
+  "secrets": {"required": ["LPP_SERVICE_KEY", "LPP_ACCESS_TEAM", "LPP_ACCESS_AUD", "LPP_OWNER_EMAIL"]}
+}

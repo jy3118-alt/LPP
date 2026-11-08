@@ -1,6 +1,6 @@
 # LPP — Private Press
 
-A private iPhone-first music player with living ink typography, ten audio-reactive grooves and a PoVF feeling recorder. The interface is English. The existing Sites project and origin are preserved.
+A private iPhone-first music player with living ink typography, ten audio-reactive grooves and a PoVF feeling recorder. The interface is English. Includes the existing Sites deployment and a separate Cloudflare entry for hosting without a ChatGPT account. See [independent hosting](docs/independent-hosting.md).
 
 ## Use on an iPhone
 1. Open the deployed address in Safari and sign in with the owner's ChatGPT account.
