@@ -9,3 +9,8 @@ Settings → Backup → Export saves music, sleeves and feelings in one JSON fil
 Browser/site data deletion or device loss can erase this library. There is no server copy or automatic cross-device sync. Keep original music and periodic backups. The app requests persistent storage where supported, but cannot guarantee OS storage retention.
 
 The private source-hosted edition is retained in the codebase for future use; it is not the Pages entry. The old Sites service has not been deleted or made public. Any prior server feeling history must be migrated separately; it does not appear automatically at the new origin.
+
+## Playback and motion
+The audible HTML audio element is the only media element. Foreground visualization uses a silent mono Web Audio buffer and stops when hidden. The main media source is not rebuilt on visibility/focus changes. Current track and position are saved locally, restored after reload, and sent to Media Session. Automatic restart after a browser reload is subject to the browser's autoplay policy; pressing play resumes the restored position. Safari tabs and a separately launched home-screen app remain separate browsing contexts. Physical iPhone lock-screen behavior still requires device verification.
+
+Typography uses the existing variable font at a stable BOIL setting with smooth transform motion. Heavy per-icon SVG turbulence filters were removed. Long titles scroll only when they overflow. Feelings retain six original font axes, with vivid continuous color interpolation, integer percentages totaling 100%, and the latest saved face shown on the record.

@@ -168,8 +168,8 @@ function createPixelResidents(){
   paint(a,travelled>.03);
  }
  function tick(time){
-  raf=0;refresh();if(document.hidden||still||!loaded){last=0;return}
-  if(last&&time-last<32){raf=requestAnimationFrame(tick);return}
+  raf=0;if(!document.hidden)refresh();if(document.hidden||still||!loaded){last=0;return}
+  // Run movement on display frames; sprite poses still follow distance.
   const dt=last?Math.min(.06,(time-last)/1000):0;last=time;
   for(const a of actors)if(a.active)update(a,dt);
   raf=requestAnimationFrame(tick);

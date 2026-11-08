@@ -7,66 +7,53 @@
   const main=canvases[0],status=document.querySelector('#reactive-state');
   if(main)document.body.append(main);
   const anchor=document.querySelector('#cover');
-  let context,source,analyser,probe,silentOutput,bins,wave,previous,frame=0,lastTime=0,phase=0,visible=!document.hidden;
-  let startingProbe=null;
+  let context,analyser,silentOutput,bins,wave,previous,smoothedWave,frame=0,lastTime=0,phase=0,visible=!document.hidden;
+  let startingProbe=null,sourceNode=null,decodedBuffer=null,decodedURL='',decodeJob=null,sourceOffset=0,sourceTime=0,sourceRate=1;
   let energy=0,bass=0,mid=0,high=0,brightness=0,texture=0,flux=0,hue=20,metricsTime=0;
   const layers=new Float32Array(10),targetLayers=new Float32Array(10);
   const contours=new WeakMap();
   const lerp=(a,b,t)=>a+(b-a)*t,clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
-  const motion=()=>document.documentElement.dataset.motion!=='off'&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function playbackSession(){
-    try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch{}
-  }
+  const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  const motion=()=>document.documentElement.dataset.motion!=='off'&&!reduceMotion.matches;
+  function playbackSession(){try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch{}}
   playbackSession();
-  function alignProbe(){
-    if(!probe||probe.readyState<1)return;
-    if(Math.abs(probe.currentTime-audio.currentTime)>.10){try{probe.currentTime=audio.currentTime}catch{}}
-    probe.playbackRate=audio.playbackRate;
-  }
+  function stopProbe(){if(sourceNode){try{sourceNode.stop();sourceNode.disconnect()}catch{}sourceNode=null}}
+  function alignProbe(){if(!sourceNode||!context)return;const predicted=sourceOffset+(context.currentTime-sourceTime)*sourceRate;if(Math.abs(predicted-audio.currentTime)>.25){stopProbe();startProbe()}}
   async function startProbe(){
     if(startingProbe)return startingProbe;
     startingProbe=(async()=>{
       if(!context||!visible||audio.paused||!motion())return false;
       try{
         if(context.state!=='running')await context.resume();
+        const url=audio.currentSrc||audio.src;if(!url)return false;
+        if(decodedURL!==url){
+          if(!decodeJob||decodeJob.url!==url)decodeJob={url,promise:fetch(url).then(r=>{if(!r.ok)throw Error('No analysis audio');return r.arrayBuffer()}).then(bytes=>context.decodeAudioData(bytes)).then(buffer=>{const rate=22050,ratio=buffer.sampleRate/rate,mono=context.createBuffer(1,Math.ceil(buffer.length/ratio),rate),out=mono.getChannelData(0),left=buffer.getChannelData(0),right=buffer.getChannelData(Math.min(1,buffer.numberOfChannels-1));for(let i=0;i<out.length;i++){const j=Math.min(buffer.length-1,Math.floor(i*ratio));out[i]=(left[j]+right[j])*.5}return mono})};
+          const buffer=await decodeJob.promise;
+          if((audio.currentSrc||audio.src)!==url)return false;
+          decodedBuffer=buffer;decodedURL=url;
+        }
         if(!visible||audio.paused||!motion())return false;
-        const url=audio.currentSrc||audio.src;
-        if(!url)return false;
-        if(probe.src!==url){probe.src=url;probe.load();if(previous)previous.fill(0)}
-        alignProbe();
-        await probe.play();
-        if(!visible||audio.paused||!motion()){probe.pause();return false}
-        alignProbe();return true;
-      }catch{if(status)status.textContent='A QUIET IMPRESSION';return false}
+        if(sourceNode)return true;
+        sourceNode=context.createBufferSource();sourceNode.buffer=decodedBuffer;sourceNode.playbackRate.value=audio.playbackRate;
+        sourceOffset=Math.min(audio.currentTime,Math.max(0,decodedBuffer.duration-.01));sourceTime=context.currentTime;sourceRate=audio.playbackRate;
+        sourceNode.connect(analyser);sourceNode.start(0,sourceOffset);return true;
+      }catch{decodeJob=null;if(status)status.textContent='A QUIET IMPRESSION';return false}
     })();
     try{return await startingProbe}finally{startingProbe=null}
   }
   async function unlock(){
-    playbackSession();
-    try{
-      if(!context){
-        const AudioContext=window.AudioContext||window.webkitAudioContext;
-        if(!AudioContext)return false;
-        context=new AudioContext({latencyHint:'playback'});
-        // Analyze a silent, synchronized copy. The audible HTML audio element
-        // is NEVER attached to this AudioContext and can keep playing alone.
-        probe=new Audio();probe.preload='auto';probe.setAttribute('playsinline','');
-        probe.setAttribute('aria-hidden','true');probe.dataset.lppAnalysis='silent';
-        probe.hidden=true;document.body.append(probe);
-        source=context.createMediaElementSource(probe);
-        analyser=context.createAnalyser();analyser.fftSize=2048;analyser.smoothingTimeConstant=.65;
-        silentOutput=context.createGain();silentOutput.gain.value=0;
-        source.connect(analyser);analyser.connect(silentOutput);silentOutput.connect(context.destination);
-        probe.addEventListener('loadedmetadata',alignProbe);
-        bins=new Uint8Array(analyser.frequencyBinCount);wave=new Float32Array(analyser.fftSize);previous=new Float32Array(bins.length);
+    playbackSession();try{
+      if(!context){const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext)return false;context=new AudioContext({latencyHint:'playback'});
+        analyser=context.createAnalyser();analyser.fftSize=1024;analyser.smoothingTimeConstant=.75;
+        silentOutput=context.createGain();silentOutput.gain.value=0;analyser.connect(silentOutput);silentOutput.connect(context.destination);
+        bins=new Uint8Array(analyser.frequencyBinCount);wave=new Float32Array(analyser.fftSize);smoothedWave=new Float32Array(wave.length);previous=new Float32Array(bins.length);
       }
-      if(context.state!=='running')await context.resume();
-      await startProbe();return context.state==='running';
-    }catch{if(status)status.textContent='A QUIET IMPRESSION';return false}
+      if(context.state!=='running')await context.resume();startProbe();return context.state==='running';
+    }catch{return false}
   }
   function analyse(){
-    if(!analyser||audio.paused||!probe||probe.paused||context.state!=='running'){targetLayers.fill(0);return {energy:0,bass:0,mid:0,high:0,brightness:0,texture:0,flux:0}}
-    analyser.getByteFrequencyData(bins);analyser.getFloatTimeDomainData(wave);
+    if(!analyser||audio.paused||!sourceNode||context.state!=='running'){targetLayers.fill(0);return {energy:0,bass:0,mid:0,high:0,brightness:0,texture:0,flux:0}}
+    analyser.getByteFrequencyData(bins);analyser.getFloatTimeDomainData(wave);let rolling=0;for(let j=-8;j<=8;j++)rolling+=wave[(j+wave.length)%wave.length];for(let j=0;j<wave.length;j++){smoothedWave[j]=rolling/17;rolling+=wave[(j+9)%wave.length]-wave[(j-8+wave.length)%wave.length]}
     let squares=0,crossings=0,total=0,weighted=0,rise=0,logSum=0,powerSum=0,count=0;
     for(let i=0;i<wave.length;i++){squares+=wave[i]*wave[i];if(i&&wave[i]*wave[i-1]<0)crossings++}
     const rms=Math.sqrt(squares/wave.length),gate=clamp((rms-.0007)*900);
@@ -94,7 +81,7 @@
     const rx=active ? .22+Math.sin(phase*.3)*m*.12:0,ry=active?-.30+Math.cos(phase*.25)*b*.10:0,rz=active?Math.sin(phase*.13)*.07:0;
     const cx=Math.cos(rx),sx=Math.sin(rx),cy=Math.cos(ry),sy=Math.sin(ry),cz=Math.cos(rz),sz=Math.sin(rz);
     const flow=active?phase:0;
-    const points=small?80:144;
+    const points=small?48:96;
     let contour=contours.get(canvas);if(!contour){contour={radius:new Float32Array(10*(points+1)),depth:new Float32Array(10*(points+1))};for(let layer=0;layer<10;layer++)for(let j=0;j<=points;j++)contour.radius[layer*(points+1)+j]=13+layer*10.8;contours.set(canvas,contour)}
     for(let layer=0;layer<10;layer++){
       const radius=13+layer*10.8,band=active?layers[layer]:0;
@@ -106,7 +93,7 @@
       for(let j=0;j<=points;j++){
         const angle=j/points*Math.PI*2;
         const rough=Math.sin(angle*37+layer*2.3+flow*1.7)*.9+Math.sin(angle*63+layer*4-flow)*.45;
-        let sample=0;if(wave){const center=(Math.floor(j/points*wave.length)+layer*41)%wave.length;for(let offset=-8;offset<=8;offset++)sample+=wave[(center+offset+wave.length)%wave.length];sample/=17}
+        const sample=smoothedWave?smoothedWave[(Math.floor(j/points*smoothedWave.length)+layer*41)%smoothedWave.length]:0;
         const ripple=Math.sin(angle*(3+layer%4)+phase*(2+h*9)+layer)*band*(10+e*75)+sample*e*95+Math.sin(angle*7-phase*3+layer)*flux*13;
         const index=layer*(points+1)+j;
         const targetRadius=Math.max(5,radius*(1+e*.12+flux*.13)+rough*(1+t*8+flux*5)+ripple+Math.sin(angle*5+flow*.7+layer*.5)*.55);
@@ -125,13 +112,12 @@
     ctx.restore();
     if(canvas===main){canvas.dataset.layers='10';canvas.dataset.flow=phase.toFixed(4);canvas.dataset.hue=hue.toFixed(1);canvas.dataset.energy=energy.toFixed(4);canvas.dataset.bass=bass.toFixed(4);canvas.dataset.high=high.toFixed(4);canvas.dataset.texture=texture.toFixed(4);canvas.dataset.rotationX=rx.toFixed(4);canvas.dataset.rotationY=ry.toFixed(4);canvas.dataset.depth=((12+40*b+24*m)*e*4.5).toFixed(3)}
   }
-  function resize(){for(const canvas of canvases){const width=canvas.clientWidth,height=canvas.clientHeight;if(!width||!height)continue;const dpr=Math.min(devicePixelRatio||1,1.8);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr)}paint()}
+  function resize(){for(const canvas of canvases){const width=canvas.clientWidth,height=canvas.clientHeight;if(!width||!height)continue;const dpr=Math.min(devicePixelRatio||1,innerWidth<700?1.25:1.6);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr)}paint()}
   function paint(){canvases.forEach(canvas=>draw(canvas,canvas.id==='mini-reactive'))}
   function loop(now){
     frame=0;if(!visible)return;
-    if(now-lastTime<14){frame=requestAnimationFrame(loop);return}
-    const dt=Math.min(.08,Math.max(0,(now-lastTime)/1000));lastTime=now;
-    if(probe&&!audio.paused)alignProbe();
+        const dt=Math.min(.08,Math.max(0,(now-lastTime)/1000));lastTime=now;
+    if(sourceNode&&!audio.paused)alignProbe();
     const target=motion()?analyse():{energy:0,bass:0,mid:0,high:0,brightness:0,texture:0,flux:0};
     energy=lerp(energy,target.energy,.16);bass=lerp(bass,target.bass,.14);mid=lerp(mid,target.mid,.14);high=lerp(high,target.high,.12);brightness=lerp(brightness,target.brightness,.12);texture=lerp(texture,target.texture,.12);flux=lerp(flux,target.flux,.14);
     for(let i=0;i<10;i++)layers[i]=lerp(layers[i],motion()?targetLayers[i]:0,.12);
@@ -142,11 +128,11 @@
     if(motion()||energy>.001)frame=requestAnimationFrame(loop);
   }
   function kick(){if(!frame&&visible){lastTime=performance.now();frame=requestAnimationFrame(loop)}}
-  audio.addEventListener('play',()=>{playbackSession();startProbe();kick()});audio.addEventListener('pause',()=>{probe?.pause();kick()});audio.addEventListener('ended',()=>{probe?.pause();kick()});audio.addEventListener('seeked',()=>{alignProbe();if(!audio.paused)startProbe();kick()});audio.addEventListener('ratechange',alignProbe);
-  document.addEventListener('visibilitychange',()=>{visible=!document.hidden;if(!visible){cancelAnimationFrame(frame);frame=0;probe?.pause()}else{playbackSession();if(!audio.paused)startProbe();kick()}});
+  audio.addEventListener('play',()=>{playbackSession();startProbe();kick()});audio.addEventListener('pause',()=>{stopProbe();kick()});audio.addEventListener('ended',()=>{stopProbe();kick()});audio.addEventListener('seeked',()=>{stopProbe();if(!audio.paused)startProbe();kick()});audio.addEventListener('ratechange',()=>{stopProbe();if(!audio.paused)startProbe()});
+  document.addEventListener('visibilitychange',()=>{visible=!document.hidden;if(!visible){cancelAnimationFrame(frame);frame=0;stopProbe()}else{playbackSession();if(!audio.paused)startProbe();kick()}});
   new ResizeObserver(resize).observe(document.querySelector('.now-panel'));
   new ResizeObserver(resize).observe(document.querySelector('#open-player'));
   window.addEventListener('resize',resize);
-  window.LPPVisuals={unlock,motionChanged(){if(motion()&&!audio.paused)startProbe();else probe?.pause();kick();paint()}};
+  window.LPPVisuals={unlock,motionChanged(){if(motion()&&!audio.paused)startProbe();else stopProbe();kick();paint()}};
   resize();kick();
 })();
