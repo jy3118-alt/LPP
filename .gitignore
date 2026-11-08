@@ -7,3 +7,6 @@ outputs/
 .sites-runtime/
 
 .wrangler/
+
+pages-dist/
+private-backups/
