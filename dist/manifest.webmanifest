@@ -1,0 +1,1 @@
+{"id":"/","name":"소장 — 나만의 음악","short_name":"소장","lang":"ko","description":"나의 음악을 기기에 보관하고 듣는 개인 음악 플레이어","start_url":"/","scope":"/","display":"standalone","background_color":"#f7f8f2","theme_color":"#102d24","icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
