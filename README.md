@@ -1,6 +1,6 @@
 # LPP — Private Press
 
-**Current deployment: device-only GitHub Pages.** See [device edition](docs/device-edition.md). Music and feelings stay on the device, with full backup/restore. The server-hosted instructions below describe the retained older edition.
+**Current deployment: device-only GitHub Pages.** See [device edition](docs/device-edition.md). The approved 11-song library is public and appears automatically; extra imports and feelings stay on the device, with full backup/restore. The server-hosted instructions below describe the retained older edition.
 
 A private iPhone-first music player with living ink typography, ten audio-reactive grooves and a PoVF feeling recorder. The interface is English. Includes the existing Sites deployment and a separate Cloudflare entry for hosting without a ChatGPT account. See [independent hosting](docs/independent-hosting.md).
 
