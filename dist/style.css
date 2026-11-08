@@ -12,3 +12,38 @@ html[data-motion=off],html[data-motion=off] .glyph,html[data-motion=off] .ink-fr
 @media(prefers-reduced-motion:reduce){:root{animation:none;font-variation-settings:'BOIL' 0}.glyph{animation:none}.ink-frame{animation:none;opacity:0}.ink-frame:first-child{opacity:1}.cover{animation:none}.tonearm{transition:none}*{scroll-behavior:auto!important}}
 *{font-variation-settings:inherit}
 .glyph .ink-frame use{vector-effect:non-scaling-stroke}
+/* Ten projected grooves replace the decorative vinyl platter. */
+.cover{animation:none!important;background:transparent;box-shadow:none}
+.center-label{display:none}
+#reactive-record{display:block;width:100%;height:100%;aspect-ratio:1}
+.reactive-fallback{display:none}
+#mini-reactive{display:block;width:100%;height:100%;aspect-ratio:1}
+.mini-art{border-radius:0;background:transparent;color:var(--accent)}
+.reactive-info{display:flex;justify-content:space-between;gap:10px;font-size:6px;letter-spacing:.8px;color:#6e6e64;margin:-7px 0 22px}
+.reactive-info span:first-child{color:var(--accent)}
+.now-panel .turntable{padding-right:0}
+.player-open .turntable{padding-right:0}
+.intro h1{font-size:clamp(26px,2.9vw,38px);letter-spacing:-1.6px}
+@media(max-width:650px){.intro h1{font-size:27px;letter-spacing:-1.6px}.intro p{font-size:9px}.hero-art{max-width:32%;margin-right:-16px}.hero-content>div:first-child{max-width:80%;flex-shrink:1}.hero-content .primary{font-size:11px}.help-button{font-size:7px;max-width:85px;text-align:right;line-height:1.7}.reactive-info{font-size:5.5px;margin-bottom:22px}.collection-actions{font-size:7px}.mobile-nav button>span:last-child{font-size:7px}.filters{gap:18px}.filter{font-size:10px}.sleeve-title{font-size:26px}.mini-info strong{font-size:10px}.text-button{font-size:9px}.track-title{font-size:11px}.now-title h2{font-size:25px}}
+/* A quieter interface: record, shelf, transport. */
+.intro{padding:23px 27px;margin-bottom:29px}
+.intro h1{margin:0 0 25px;font-size:38px;line-height:1.2}
+.hero-art{width:154px;max-width:36%;margin-right:0}
+.hero-content{gap:18px;min-height:155px}
+.hero-content>div:first-child{flex-shrink:1}
+.hero-content .primary{white-space:nowrap}
+.now-panel{justify-content:flex-start}
+.now-title{margin-top:10px}
+.turntable{margin-top:13px;margin-bottom:20px}
+.player-open .now-panel{justify-content:space-between}
+.player-open .now-heading{margin-bottom:6px}
+.player-open .turntable{margin-top:0;margin-bottom:10px;max-width:365px}
+.player-open .now-title{margin-top:0}
+.player-open .progress{margin-top:18px}
+.player-open .controls{margin-top:13px}
+.player-open .volume{margin-top:25px;margin-bottom:24px}
+.settings-footnote{font-size:10px!important;margin-top:24px;color:#77776e!important}
+.license-link{font-size:9px;color:#77776e}
+.install-steps{margin:20px 0 4px;padding-left:22px}
+.install-steps li{padding:12px 0;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink)}
+@media(max-width:650px){.intro{padding:20px 21px}.hero-content{min-height:138px;gap:6px}.intro h1{font-size:28px;margin:0 0 20px}.hero-art{width:112px;max-width:34%;margin:0 -5px 0 0}.hero-content .primary{font-size:10px;padding:10px 12px}.hero-content>div:first-child{max-width:70%}.empty{padding:30px 5px}.help-button{font-size:8px;max-width:100px}.player-open .turntable{margin-top:3px}.player-open .now-title{margin-top:0}.player-open .volume{margin-bottom:25px}.now-panel .now-heading{font-size:10px;letter-spacing:1px}}

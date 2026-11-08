@@ -31,3 +31,8 @@
 
 ## 로컬 실행
 `python3 -m http.server 4173 --directory dist`
+
+## Reactive grooves / English UI update
+The player now renders ten concentric rough rings using Canvas and projects their 3D coordinates into the screen. A Web Audio analyser reads the existing audio element locally: RMS controls intensity, low-frequency energy controls depth, mid/high frequency bands shape the contours, and spectral centroid/flatness/flux control color and jitter. This is frequency-based audio reactivity, not musical-note or instrument recognition. The visual pauses when hidden and becomes a static impression when motion is off. No microphone access is used. The direct audio destination connection remains separate from the analysis branch.
+
+All product copy is English. Imported titles and artist names retain the user's original text. Explanatory paragraphs, slogans, technical captions and long setup text have been removed from the main flow. Settings uses short rows; Home Screen setup has three steps.
