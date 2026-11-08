@@ -1,0 +1,14 @@
+{
+  "family": "Open Cosmos Ink KR Full",
+  "derivedFrom": "Noto Serif KR Bold",
+  "axes": [
+    {
+      "tag": "BOIL",
+      "min": 0.0,
+      "max": 3.0
+    }
+  ],
+  "hangulSyllables": 11172,
+  "subsetCount": 23,
+  "license": "SIL OFL 1.1"
+}
