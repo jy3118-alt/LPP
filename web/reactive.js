@@ -18,14 +18,14 @@
   function playbackSession(){try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch{}}
   playbackSession();
   function stopProbe(){if(sourceNode){try{sourceNode.stop();sourceNode.disconnect()}catch{}sourceNode=null}}
-  function suspendProbe(){stopProbe();if(context&&context.state==='running'){suspendingProbe=context.suspend().catch(()=>{}).finally(()=>{suspendingProbe=null})}}
+  function suspendProbe(){stopProbe();if(context&&context.state==='running'){const pending=context.suspend().catch(()=>{});suspendingProbe=pending;pending.finally(()=>{if(suspendingProbe===pending)suspendingProbe=null})}}
   function alignProbe(){if(!sourceNode||!context)return;const predicted=sourceOffset+(context.currentTime-sourceTime)*sourceRate;if(Math.abs(predicted-audio.currentTime)>.25){stopProbe();startProbe()}}
   async function startProbe(){
     if(startingProbe)return startingProbe;
     startingProbe=(async()=>{
       if(!context||!visible||audio.paused||!motion())return false;
       try{
-        if(suspendingProbe)await suspendingProbe;if(!visible||audio.paused||!motion())return false;
+        while(suspendingProbe)await suspendingProbe;if(!visible||audio.paused||!motion())return false;
         if(context.state!=='running')await context.resume();
         const url=audio.currentSrc||audio.src;if(!url)return false;
         if(decodedURL!==url){
@@ -50,7 +50,7 @@
         silentOutput=context.createGain();silentOutput.gain.value=0;analyser.connect(silentOutput);silentOutput.connect(context.destination);
         bins=new Uint8Array(analyser.frequencyBinCount);wave=new Float32Array(analyser.fftSize);smoothedWave=new Float32Array(wave.length);previous=new Float32Array(bins.length);
       }
-      if(suspendingProbe)await suspendingProbe;if(context.state!=='running')await context.resume();startProbe();return context.state==='running';
+      while(suspendingProbe)await suspendingProbe;if(context.state!=='running')await context.resume();startProbe();return context.state==='running';
     }catch{return false}
   }
   function analyse(){

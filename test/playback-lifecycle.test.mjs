@@ -29,3 +29,11 @@ test('hiding stops only the analysis source; returning leaves audible audio stat
  document.hidden=true;document.handlers.visibilitychange();await Promise.resolve();assert.equal(stopped,1);assert.equal(disconnected,1);assert.equal(suspended,1);assert.equal(audio.paused,false);assert.equal(audio.currentTime,42);
  document.hidden=false;document.handlers.visibilitychange();assert.equal(restarted,1);assert.equal(painted,1);assert.equal(audio.paused,false);assert.equal(audio.currentTime,42);
 });
+
+test('rapid hide transitions do not lose track of a newer analysis suspension',async()=>{
+ const pending=[];const scope=vm.createContext({sourceNode:null,suspendingProbe:null,context:{state:'running',suspend(){return new Promise(resolve=>pending.push(resolve))}}});
+ vm.runInContext(reactive.slice(reactive.indexOf('  function stopProbe()'),reactive.indexOf('  function alignProbe()')),scope);
+ scope.suspendProbe();const first=scope.suspendingProbe;scope.suspendProbe();const second=scope.suspendingProbe;
+ assert.notEqual(first,second);pending[0]();await first;await Promise.resolve();assert.equal(scope.suspendingProbe,second);
+ pending[1]();await second;await Promise.resolve();assert.equal(scope.suspendingProbe,null);
+});
