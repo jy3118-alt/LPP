@@ -80,6 +80,7 @@ if('mediaSession'in navigator){for(const [key,fn] of Object.entries({play:()=>se
 if(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)){const volume=document.querySelector('.volume');volume.innerHTML='<span class="ios-volume-note">Use the volume buttons on your iPhone</span>';volume.style.justifyContent='center';}
 
 window.addEventListener('online',()=>syncShelf().then(()=>{if(DEVICE)LPPDevice.cacheLibrary(tracks,cacheAudio,refreshCachedRecord)}));
+if(DEVICE&&'serviceWorker'in navigator)navigator.serviceWorker.addEventListener('controllerchange',()=>{if(db)syncShelf().then(()=>LPPDevice.cacheLibrary(tracks,cacheAudio,refreshCachedRecord)).catch(()=>{})});
 
 window.LPPToast=toast;window.LPPNow=()=>({track:current,time:audio.currentTime});
 function feelingStore(mode,action){return new Promise((resolve,reject)=>{if(!db){reject(Error('Storage is not ready.'));return}const tx=db.transaction('feelings',mode);const request=action(tx.objectStore('feelings'));tx.oncomplete=()=>resolve(request.result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
