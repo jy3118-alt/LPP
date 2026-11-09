@@ -82,7 +82,7 @@ function createPixelResidents(){
  function measure(){
   const oldW=W,oldH=H;W=document.documentElement.clientWidth;H=innerHeight;
   if(oldW&&(oldW!==W||oldH!==H)){for(const mark of prints)mark.remove();prints.length=0}
-  const small=W<650;sw=small?44.8:56;sh=small?49.28:61.6;count=small?3:5;still=override||reduced.matches||document.documentElement.dataset.motion==='off';
+  const small=W<650;sw=small?44.8:56;sh=small?49.28:61.6;count=small?3:5;still=override||document.documentElement.dataset.motion==='off';
   Object.assign(summary,{pixelMotion:still?'still':'roaming',pixelCapacity:String(count),pixelVisible:String(count),pixelSpace:'viewport',pixelScale:'0.70'});
   for(const a of actors){
    a.active=a.index<count;a.button.hidden=!loaded||!a.active;

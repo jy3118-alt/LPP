@@ -107,3 +107,9 @@ html[data-paused=true] .marquee-copy,html[data-paused=true] .brand,html[data-pau
 #feel .povf-face{font-size:24px;line-height:1}
 @media(max-width:650px){.track-feel .povf-face{font-size:21px}#feel .povf-face{font-size:23px}}
 @media(max-width:650px){.brand,.mobile-brand,.intro h1,.marquee-copy{animation-duration:1.4s}.is-scrolling .marquee-copy{animation:title-flow var(--scroll-duration,8s) ease-in-out infinite}}
+
+@keyframes soft-type-drift{0%,100%{transform:translate3d(-.6px,.5px,0) rotate(-.35deg)}50%{transform:translate3d(.6px,-.5px,0) rotate(.35deg)}}
+.mobile-player{touch-action:pan-y}
+
+/* Settings can explicitly enable motion even when the device defaults to reduced motion. */
+@media(prefers-reduced-motion:reduce){html[data-motion=on] .glyph{animation:soft-ink-drift 1.6s ease-in-out infinite!important}html[data-motion=on] .brand,html[data-motion=on] .mobile-brand,html[data-motion=on] .intro h1,html[data-motion=on] .marquee-copy{animation:soft-type-drift 1.4s ease-in-out infinite!important}html[data-motion=on] .is-scrolling .marquee-copy{animation:title-flow var(--scroll-duration,8s) ease-in-out infinite!important}}

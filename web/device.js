@@ -31,17 +31,18 @@ window.LPP_DEVICE_ONLY=true;
   const cell=value=>{let s=typeof value==='object'?JSON.stringify(value):String(value??'');if(/^[=+@]/.test(s)||/^-[^0-9]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"'};
   download(new Blob(['\ufeff'+keys.join(',')+'\r\n'+entries.map(f=>keys.map(k=>cell(f[k])).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),'LPP-feelings.csv');
  }
+ const caching=new Set();
  function hidden(){try{return JSON.parse(localStorage.getItem('lpp-hidden-bundles')||'[]')}catch{return []}}
  function hide(id){try{localStorage.setItem('lpp-hidden-bundles',JSON.stringify([...new Set([...hidden(),id])]))}catch{}}
  async function seedLibrary(tracks,persist){
   try{const response=await fetch('library/catalog.json',{cache:'no-cache'});if(!response.ok)throw Error();const catalog=await response.json();const merged=[...tracks];
    for(const item of catalog.records){if(hidden().includes(item.id))continue;const index=merged.findIndex(t=>t.id===item.id),local=merged[index];
     const next=local?{...item,...local,publicAudio:item.publicAudio,bundled:true,cloud:false}:{...item,favorite:false};
-    await persist(next);if(index>=0)merged[index]=next;else merged.push(next);
+    if(index>=0){Object.assign(local,{publicAudio:item.publicAudio,bundled:true,cloud:false});merged[index]=local}else{await persist(next);merged.push(next)}
    }return merged;
   }catch{return tracks;}
  }
  async function downloadRecord(track){if(!track.publicAudio)throw Error('No audio source.');const response=await fetch(track.publicAudio);if(!response.ok)throw Error('Could not download this record.');const blob=await response.blob();if(await hash(blob)!==track.id)throw Error('Audio checksum did not match.');return blob;}
- async function cacheLibrary(tracks,persist,onChange){const queue=tracks.filter(t=>t.bundled&&!t.blob);await Promise.all(Array.from({length:3},async()=>{while(queue.length){const track=queue.shift();try{const blob=await downloadRecord(track);if(!tracks.includes(track)||hidden().includes(track.id))continue;track.blob=blob;await persist(track);onChange()}catch{}}}));if(navigator.storage?.persist)navigator.storage.persist().catch(()=>{});}
+ async function cacheLibrary(tracks,saveAudio,onChange){const queue=tracks.filter(t=>t.bundled&&!t.blob&&!caching.has(t.id));for(const track of queue)caching.add(track.id);await Promise.all(Array.from({length:2},async()=>{while(queue.length){const track=queue.shift();try{const blob=await downloadRecord(track);if(!tracks.includes(track)||hidden().includes(track.id))continue;if(await saveAudio(track.id,blob))onChange(track.id)}catch{}finally{caching.delete(track.id)}}}));if(navigator.storage?.persist)navigator.storage.persist().catch(()=>{});}
  window.LPPDevice={hash,exportBackup,restoreBackup,exportFeelings,seedLibrary,cacheLibrary,download:downloadRecord,hide};
 })();

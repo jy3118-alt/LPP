@@ -7,14 +7,14 @@
   const main=canvases[0],status=document.querySelector('#reactive-state');
   if(main)document.body.append(main);
   const anchor=document.querySelector('#cover');
-  let context,analyser,silentOutput,bins,wave,previous,smoothedWave,frame=0,lastTime=0,phase=0,visible=!document.hidden;
+  let context,analyser,silentOutput,bins,wave,previous,smoothedWave,frame=0,lastTime=0,phase=0,spin=0,visible=!document.hidden;
   let startingProbe=null,sourceNode=null,decodedBuffer=null,decodedURL='',decodeJob=null,sourceOffset=0,sourceTime=0,sourceRate=1;
   let energy=0,bass=0,mid=0,high=0,brightness=0,texture=0,flux=0,hue=20,metricsTime=0;
   const layers=new Float32Array(10),targetLayers=new Float32Array(10);
   const contours=new WeakMap();
   const lerp=(a,b,t)=>a+(b-a)*t,clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
   const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
-  const motion=()=>document.documentElement.dataset.motion!=='off'&&!reduceMotion.matches;
+  const motion=()=>document.documentElement.dataset.motion!=='off';
   function playbackSession(){try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch{}}
   playbackSession();
   function stopProbe(){if(sourceNode){try{sourceNode.stop();sourceNode.disconnect()}catch{}sourceNode=null}}
@@ -78,7 +78,7 @@
     const active=motion(),e=active?energy:0,b=active?bass:0,m=active?mid:0,h=active?high:0,t=active?texture:0;
     // A stable oblique camera makes front/back separation readable.
     // Z is actual per-layer depth below, not an amplitude-driven tilt.
-    const rx=active ? .22+Math.sin(phase*.3)*m*.12:0,ry=active?-.30+Math.cos(phase*.25)*b*.10:0,rz=active?phase*.08:0;
+    const rx=active ? .22+Math.sin(phase*.3)*m*.12:0,ry=active?-.30+Math.cos(phase*.25)*b*.10:0,rz=active?spin:0;
     const cx=Math.cos(rx),sx=Math.sin(rx),cy=Math.cos(ry),sy=Math.sin(ry),cz=Math.cos(rz),sz=Math.sin(rz);
     const flow=active?phase:0;
     const points=small?48:96;
@@ -122,7 +122,7 @@
     energy=lerp(energy,target.energy,.16);bass=lerp(bass,target.bass,.14);mid=lerp(mid,target.mid,.14);high=lerp(high,target.high,.12);brightness=lerp(brightness,target.brightness,.12);texture=lerp(texture,target.texture,.12);flux=lerp(flux,target.flux,.14);
     for(let i=0;i<10;i++)layers[i]=lerp(layers[i],motion()?targetLayers[i]:0,.12);
     hue=lerp(hue,21-brightness*10+bass*8+flux*2,.07);
-    if(motion())phase+=dt*(1.1+energy*4+flux*5);
+    if(motion()){phase+=dt*(1.1+energy*4+flux*5);spin=(spin+dt*.12)%(Math.PI*2)}
     paint();
     if(now-metricsTime>250){metricsTime=now;if(status)status.textContent=audio.paused?'READY TO RESONATE':!analyser?'A QUIET IMPRESSION':motion()?'SHAPED BY YOUR SOUND':'A STILL IMPRESSION'}
     if(motion()||energy>.001)frame=requestAnimationFrame(loop);
