@@ -113,3 +113,9 @@ html[data-paused=true] .marquee-copy,html[data-paused=true] .brand,html[data-pau
 
 /* Settings can explicitly enable motion even when the device defaults to reduced motion. */
 @media(prefers-reduced-motion:reduce){html[data-motion=on] .glyph{animation:soft-ink-drift 1.6s ease-in-out infinite!important}html[data-motion=on] .brand,html[data-motion=on] .mobile-brand,html[data-motion=on] .intro h1,html[data-motion=on] .marquee-copy{animation:soft-type-drift 1.4s ease-in-out infinite!important}html[data-motion=on] .is-scrolling .marquee-copy{animation:title-flow var(--scroll-duration,8s) ease-in-out infinite!important}}
+
+/* Animate the variable font's actual contour axis, leaving PoVF feeling axes intact. */
+@keyframes lpp-fluid-ink{0%,100%{font-variation-settings:'BOIL' .08}28%{font-variation-settings:'BOIL' 1.35}58%{font-variation-settings:'BOIL' 2.95}82%{font-variation-settings:'BOIL' 1.6}}
+html[data-motion=on]{animation:lpp-fluid-ink 2.8s ease-in-out infinite}
+html[data-motion=off]{animation:none;font-variation-settings:'BOIL' 0}
+html[data-paused=true]{animation-play-state:paused!important}

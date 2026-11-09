@@ -8,7 +8,7 @@
   if(main)document.body.append(main);
   const anchor=document.querySelector('#cover');
   let context,analyser,silentOutput,bins,wave,previous,smoothedWave,frame=0,lastTime=0,phase=0,spin=0,visible=!document.hidden;
-  let startingProbe=null,sourceNode=null,decodedBuffer=null,decodedURL='',decodeJob=null,sourceOffset=0,sourceTime=0,sourceRate=1;
+  let startingProbe=null,suspendingProbe=null,sourceNode=null,decodedBuffer=null,decodedURL='',decodeJob=null,sourceOffset=0,sourceTime=0,sourceRate=1;
   let energy=0,bass=0,mid=0,high=0,brightness=0,texture=0,flux=0,hue=20,metricsTime=0;
   const layers=new Float32Array(10),targetLayers=new Float32Array(10);
   const contours=new WeakMap();
@@ -18,12 +18,14 @@
   function playbackSession(){try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch{}}
   playbackSession();
   function stopProbe(){if(sourceNode){try{sourceNode.stop();sourceNode.disconnect()}catch{}sourceNode=null}}
+  function suspendProbe(){stopProbe();if(context&&context.state==='running'){suspendingProbe=context.suspend().catch(()=>{}).finally(()=>{suspendingProbe=null})}}
   function alignProbe(){if(!sourceNode||!context)return;const predicted=sourceOffset+(context.currentTime-sourceTime)*sourceRate;if(Math.abs(predicted-audio.currentTime)>.25){stopProbe();startProbe()}}
   async function startProbe(){
     if(startingProbe)return startingProbe;
     startingProbe=(async()=>{
       if(!context||!visible||audio.paused||!motion())return false;
       try{
+        if(suspendingProbe)await suspendingProbe;if(!visible||audio.paused||!motion())return false;
         if(context.state!=='running')await context.resume();
         const url=audio.currentSrc||audio.src;if(!url)return false;
         if(decodedURL!==url){
@@ -48,7 +50,7 @@
         silentOutput=context.createGain();silentOutput.gain.value=0;analyser.connect(silentOutput);silentOutput.connect(context.destination);
         bins=new Uint8Array(analyser.frequencyBinCount);wave=new Float32Array(analyser.fftSize);smoothedWave=new Float32Array(wave.length);previous=new Float32Array(bins.length);
       }
-      if(context.state!=='running')await context.resume();startProbe();return context.state==='running';
+      if(suspendingProbe)await suspendingProbe;if(context.state!=='running')await context.resume();startProbe();return context.state==='running';
     }catch{return false}
   }
   function analyse(){
@@ -129,7 +131,7 @@
   }
   function kick(){if(!frame&&visible){lastTime=performance.now();frame=requestAnimationFrame(loop)}}
   audio.addEventListener('play',()=>{playbackSession();startProbe();kick()});audio.addEventListener('pause',()=>{stopProbe();kick()});audio.addEventListener('ended',()=>{stopProbe();kick()});audio.addEventListener('seeked',()=>{stopProbe();if(!audio.paused)startProbe();kick()});audio.addEventListener('ratechange',()=>{stopProbe();if(!audio.paused)startProbe()});
-  document.addEventListener('visibilitychange',()=>{visible=!document.hidden;if(!visible){cancelAnimationFrame(frame);frame=0;stopProbe()}else{playbackSession();if(!audio.paused)startProbe();kick()}});
+  document.addEventListener('visibilitychange',()=>{visible=!document.hidden;if(!visible){cancelAnimationFrame(frame);frame=0;suspendProbe()}else{playbackSession();if(!audio.paused)startProbe();kick()}});
   new ResizeObserver(resize).observe(document.querySelector('.now-panel'));
   new ResizeObserver(resize).observe(document.querySelector('#open-player'));
   window.addEventListener('resize',resize);
