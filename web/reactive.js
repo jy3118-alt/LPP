@@ -78,7 +78,7 @@
     const active=motion(),e=active?energy:0,b=active?bass:0,m=active?mid:0,h=active?high:0,t=active?texture:0;
     // A stable oblique camera makes front/back separation readable.
     // Z is actual per-layer depth below, not an amplitude-driven tilt.
-    const rx=active ? .22+Math.sin(phase*.3)*m*.12:0,ry=active?-.30+Math.cos(phase*.25)*b*.10:0,rz=active?Math.sin(phase*.13)*.07:0;
+    const rx=active ? .22+Math.sin(phase*.3)*m*.12:0,ry=active?-.30+Math.cos(phase*.25)*b*.10:0,rz=active?phase*.08:0;
     const cx=Math.cos(rx),sx=Math.sin(rx),cy=Math.cos(ry),sy=Math.sin(ry),cz=Math.cos(rz),sz=Math.sin(rz);
     const flow=active?phase:0;
     const points=small?48:96;
@@ -98,7 +98,7 @@
         const index=layer*(points+1)+j;
         const targetRadius=Math.max(5,radius*(1+e*.12+flux*.13)+rough*(1+t*8+flux*5)+ripple+Math.sin(angle*5+flow*.7+layer*.5)*.55);
         const r=active?(contour.radius[index]=lerp(contour.radius[index],targetRadius,.16)):targetRadius;
-        let x=Math.cos(angle)*r+Math.sin(phase*1.2+layer*.42)*e*(4+band*13),y=Math.sin(angle)*r+Math.cos(phase*.9+layer*.35)*e*(4+b*12);
+        let x=Math.cos(angle)*r,y=Math.sin(angle)*r;
         const targetZ=((layer-4.5)*(12+40*b+24*m)+Math.sin(angle*3+flow*1.1+layer*.4)*m*46+Math.sin(angle*7+flow*1.7)*t*35)*e;
         const z=active?(contour.depth[index]=lerp(contour.depth[index],targetZ,.12)):0;
         const yy=y*cx-z*sx,zz=y*sx+z*cx;const xx=x*cy+zz*sy,depth=-x*sy+zz*cy;

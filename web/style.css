@@ -102,3 +102,8 @@ html[data-motion=off],html[data-motion=off] .glyph,html[data-motion=off] .ink-fr
 html[data-motion=off] .marquee-copy,html[data-motion=off] .brand,html[data-motion=off] .mobile-brand,html[data-motion=off] .intro h1{animation:none!important}
 html[data-paused=true] .marquee-copy,html[data-paused=true] .brand,html[data-paused=true] .mobile-brand,html[data-paused=true] .intro h1{animation-play-state:paused!important}
 .now-title h2>.marquee-copy{font-size:inherit;letter-spacing:inherit;color:inherit;margin-left:0}
+
+.track-feel .povf-face{font-size:23px;line-height:1;transform:translateY(-2px)}
+#feel .povf-face{font-size:24px;line-height:1}
+@media(max-width:650px){.track-feel .povf-face{font-size:21px}#feel .povf-face{font-size:23px}}
+@media(max-width:650px){.brand,.mobile-brand,.intro h1,.marquee-copy{animation-duration:1.4s}.is-scrolling .marquee-copy{animation:title-flow var(--scroll-duration,8s) ease-in-out infinite}}

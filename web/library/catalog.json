@@ -150,21 +150,6 @@
       "cover": "library/a1184197408b67e9ee29a9364d258f01e066a6f19a42f69b3c99a906b7dd2535.jpg",
       "bundled": true,
       "cloud": false
-    },
-    {
-      "id": "350482ceeaa3c2cde48f851df6279fb1d0095de3a8d3ef54980df5eb4e6c46a2",
-      "title": "아버지",
-      "artist": "My music",
-      "filename": "아버지.m4a",
-      "size": 3705045,
-      "type": "audio/mp4",
-      "duration": 218.08,
-      "added": 1794144356129,
-      "color": "b",
-      "publicAudio": "library/350482ceeaa3c2cde48f851df6279fb1d0095de3a8d3ef54980df5eb4e6c46a2.m4a",
-      "cover": "library/350482ceeaa3c2cde48f851df6279fb1d0095de3a8d3ef54980df5eb4e6c46a2.jpg",
-      "bundled": true,
-      "cloud": false
     }
   ]
 }
