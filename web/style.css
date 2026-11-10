@@ -119,3 +119,6 @@ html[data-paused=true] .marquee-copy,html[data-paused=true] .brand,html[data-pau
 html[data-motion=on]{animation:lpp-fluid-ink 2.8s ease-in-out infinite}
 html[data-motion=off]{animation:none;font-variation-settings:'BOIL' 0}
 html[data-paused=true]{animation-play-state:paused!important}
+
+/* Keep the variable ink moving while reducing whole-page repaints on phones. */
+@media(max-width:650px){html[data-motion=on]{animation-timing-function:steps(20,end)}}

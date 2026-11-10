@@ -12,6 +12,9 @@
   let energy=0,bass=0,mid=0,high=0,brightness=0,texture=0,flux=0,hue=20,metricsTime=0;
   const layers=new Float32Array(10),targetLayers=new Float32Array(10);
   const contours=new WeakMap();
+  const angles=new Map();
+  let analysisAt=0,analysisTarget={energy:0,bass:0,mid:0,high:0,brightness:0,texture:0,flux:0};
+  function angleTable(points){if(!angles.has(points)){const table=[];for(let j=0;j<=points;j++){const angle=j/points*Math.PI*2;table.push({angle,cos:Math.cos(angle),sin:Math.sin(angle)})}angles.set(points,table)}return angles.get(points)}
   const lerp=(a,b,t)=>a+(b-a)*t,clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
   const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
   const motion=()=>document.documentElement.dataset.motion!=='off';
@@ -83,7 +86,7 @@
     const rx=active ? .22+Math.sin(phase*.3)*m*.12:0,ry=active?-.30+Math.cos(phase*.25)*b*.10:0,rz=active?spin:0;
     const cx=Math.cos(rx),sx=Math.sin(rx),cy=Math.cos(ry),sy=Math.sin(ry),cz=Math.cos(rz),sz=Math.sin(rz);
     const flow=active?phase:0;
-    const points=small?48:96;
+    const points=small?48:96,table=angleTable(points);
     let contour=contours.get(canvas);if(!contour){contour={radius:new Float32Array(10*(points+1)),depth:new Float32Array(10*(points+1))};for(let layer=0;layer<10;layer++)for(let j=0;j<=points;j++)contour.radius[layer*(points+1)+j]=13+layer*10.8;contours.set(canvas,contour)}
     for(let layer=0;layer<10;layer++){
       const radius=13+layer*10.8,band=active?layers[layer]:0;
@@ -93,14 +96,14 @@
       ctx.lineJoin='round';ctx.lineCap='round';
       ctx.beginPath();
       for(let j=0;j<=points;j++){
-        const angle=j/points*Math.PI*2;
+        const {angle,cos,sin}=table[j];
         const rough=Math.sin(angle*37+layer*2.3+flow*1.7)*.9+Math.sin(angle*63+layer*4-flow)*.45;
         const sample=smoothedWave?smoothedWave[(Math.floor(j/points*smoothedWave.length)+layer*41)%smoothedWave.length]:0;
         const ripple=Math.sin(angle*(3+layer%4)+phase*(2+h*9)+layer)*band*(10+e*75)+sample*e*95+Math.sin(angle*7-phase*3+layer)*flux*13;
         const index=layer*(points+1)+j;
         const targetRadius=Math.max(5,radius*(1+e*.12+flux*.13)+rough*(1+t*8+flux*5)+ripple+Math.sin(angle*5+flow*.7+layer*.5)*.55);
         const r=active?(contour.radius[index]=lerp(contour.radius[index],targetRadius,.16)):targetRadius;
-        let x=Math.cos(angle)*r,y=Math.sin(angle)*r;
+        let x=cos*r,y=sin*r;
         const targetZ=((layer-4.5)*(12+40*b+24*m)+Math.sin(angle*3+flow*1.1+layer*.4)*m*46+Math.sin(angle*7+flow*1.7)*t*35)*e;
         const z=active?(contour.depth[index]=lerp(contour.depth[index],targetZ,.12)):0;
         const yy=y*cx-z*sx,zz=y*sx+z*cx;const xx=x*cy+zz*sy,depth=-x*sy+zz*cy;
@@ -112,15 +115,17 @@
       if(!small){ctx.save();ctx.globalAlpha=.32;ctx.lineWidth=.65;ctx.translate(.7,-.45);ctx.stroke();ctx.restore()}
     }
     ctx.restore();
-    if(canvas===main){canvas.dataset.layers='10';canvas.dataset.flow=phase.toFixed(4);canvas.dataset.hue=hue.toFixed(1);canvas.dataset.energy=energy.toFixed(4);canvas.dataset.bass=bass.toFixed(4);canvas.dataset.high=high.toFixed(4);canvas.dataset.texture=texture.toFixed(4);canvas.dataset.rotationX=rx.toFixed(4);canvas.dataset.rotationY=ry.toFixed(4);canvas.dataset.depth=((12+40*b+24*m)*e*4.5).toFixed(3)}
+    if(canvas===main&&performance.now()-metricsTime>250){canvas.dataset.layers='10';canvas.dataset.flow=phase.toFixed(4);canvas.dataset.hue=hue.toFixed(1);canvas.dataset.energy=energy.toFixed(4);canvas.dataset.bass=bass.toFixed(4);canvas.dataset.high=high.toFixed(4);canvas.dataset.texture=texture.toFixed(4);canvas.dataset.rotationX=rx.toFixed(4);canvas.dataset.rotationY=ry.toFixed(4);canvas.dataset.depth=((12+40*b+24*m)*e*4.5).toFixed(3)}
   }
-  function resize(){for(const canvas of canvases){const width=canvas.clientWidth,height=canvas.clientHeight;if(!width||!height)continue;const dpr=Math.min(devicePixelRatio||1,innerWidth<700?1.25:1.6);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr)}paint()}
-  function paint(){canvases.forEach(canvas=>draw(canvas,canvas.id==='mini-reactive'))}
+  function resize(){for(const canvas of canvases){const width=canvas.clientWidth,height=canvas.clientHeight;if(!width||!height)continue;const dpr=Math.min(devicePixelRatio||1,innerWidth<700?1:1.6);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr)}paint()}
+  function paint(){const playerOpen=document.body.classList.contains('player-open');canvases.forEach(canvas=>{if(innerWidth<=930&&(canvas===main?!playerOpen:playerOpen))return;draw(canvas,canvas.id==='mini-reactive')})}
   function loop(now){
     frame=0;if(!visible)return;
         const dt=Math.min(.08,Math.max(0,(now-lastTime)/1000));lastTime=now;
     if(sourceNode&&!audio.paused)alignProbe();
-    const target=motion()?analyse():{energy:0,bass:0,mid:0,high:0,brightness:0,texture:0,flux:0};
+    if(!motion()){targetLayers.fill(0);analysisTarget={energy:0,bass:0,mid:0,high:0,brightness:0,texture:0,flux:0}}
+    else if(now-analysisAt>=33){analysisTarget=analyse();analysisAt=now}
+    const target=analysisTarget;
     energy=lerp(energy,target.energy,.16);bass=lerp(bass,target.bass,.14);mid=lerp(mid,target.mid,.14);high=lerp(high,target.high,.12);brightness=lerp(brightness,target.brightness,.12);texture=lerp(texture,target.texture,.12);flux=lerp(flux,target.flux,.14);
     for(let i=0;i<10;i++)layers[i]=lerp(layers[i],motion()?targetLayers[i]:0,.12);
     hue=lerp(hue,21-brightness*10+bass*8+flux*2,.07);
