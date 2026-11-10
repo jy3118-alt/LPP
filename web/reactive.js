@@ -81,9 +81,8 @@
     if(small)ctx.scale(width/320,height/320);
     else{const rect=anchor.getBoundingClientRect();if(!rect.width||!rect.height){ctx.restore();return}const dpr=width/canvas.clientWidth;ctx.scale(dpr,dpr);ctx.translate(rect.left+rect.width/2,rect.top+rect.height/2);ctx.scale(rect.width/320,rect.width/320);ctx.translate(-160,-160)}
     const active=motion(),e=active?energy:0,b=active?bass:0,m=active?mid:0,h=active?high:0,t=active?texture:0;
-    // A stable oblique camera makes front/back separation readable.
-    // Z is actual per-layer depth below, not an amplitude-driven tilt.
-    const rx=active ? .22+Math.sin(phase*.3)*m*.12:0,ry=active?-.30+Math.cos(phase*.25)*b*.10:0,rz=active?spin:0;
+    // The resting record faces the viewer: depth acts through perspective, not a fixed tilt.
+    const rx=0,ry=0,rz=active?spin:0;
     const cx=Math.cos(rx),sx=Math.sin(rx),cy=Math.cos(ry),sy=Math.sin(ry),cz=Math.cos(rz),sz=Math.sin(rz);
     const flow=active?phase:0;
     const points=small?48:96,table=angleTable(points);
