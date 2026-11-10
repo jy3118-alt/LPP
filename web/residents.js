@@ -17,7 +17,7 @@ function createPixelResidents(){
  const status=document.createElement('p');status.className='sr-only';status.setAttribute('role','status');
  document.body.append(traceLayer,layer,status);
  const summary=document.body.dataset;
- let loaded=false,still=false,W=0,H=0,sw=56,sh=61.6,count=5,raf=0,last=0,serial=0,obstacles=[],lastRefresh=-Infinity;
+ let loaded=false,still=false,W=0,H=0,sw=56,sh=61.6,count=5,raf=0,last=0,serial=0,obstacles=[],lastRefresh=-Infinity,layoutDirty=false;
  const pointer={x:-1000,y:-1000};
  const moving=a=>a.mode==='walk'||a.mode==='hurry';
  function random(a){a.seed=(Math.imul(a.seed,1664525)+1013904223)>>>0;return a.seed/4294967296}
@@ -90,7 +90,7 @@ function createPixelResidents(){
    else if(oldW&&oldH){a.x*=W/oldW;a.y*=H/oldH;a.tx*=W/oldW;a.ty*=H/oldH}
    a.x=clamp(a.x,sw/2+8,W-sw/2-8);a.y=clamp(a.y,sh+12,H-16);
   }
-  lastRefresh=-Infinity;refresh();
+  lastRefresh=-Infinity;refresh();layoutDirty=false;
   for(const a of actors){
    if(!free(a.x,a.y)){
     destination(a);if(free(a.tx,a.ty)){a.x=a.tx;a.y=a.ty}
@@ -168,20 +168,21 @@ function createPixelResidents(){
   paint(a,travelled>.03);
  }
  function tick(time){
-  raf=0;if(!document.hidden)refresh();if(document.hidden||still||!loaded){last=0;return}
+  raf=0;if(!document.hidden&&layoutDirty&&time-lastRefresh>=120){refresh();layoutDirty=false}if(document.hidden||still||!loaded){last=0;return}
   // Run movement on display frames; sprite poses still follow distance.
   const dt=last?Math.min(.06,(time-last)/1000):0;last=time;
   for(const a of actors)if(a.active)update(a,dt);
   raf=requestAnimationFrame(tick);
  }
  function wake(){if(loaded&&!still&&!document.hidden&&!raf)raf=requestAnimationFrame(tick)}
+ function scheduleRefresh(){layoutDirty=true;if(still){lastRefresh=-Infinity;refresh();layoutDirty=false}else wake()}
  addEventListener('pointermove',event=>{if(event.pointerType==='mouse'){pointer.x=event.clientX;pointer.y=event.clientY}},{passive:true});
  document.addEventListener('pointerleave',()=>{pointer.x=pointer.y=-1000;for(const a of actors)a.hover=false});
  document.addEventListener('visibilitychange',()=>{
   if(document.hidden){cancelAnimationFrame(raf);raf=0;last=0;summary.pixelMotion='paused'}
-  else{summary.pixelMotion=still?'still':'roaming';lastRefresh=-Infinity;refresh();wake()}
+  else{summary.pixelMotion=still?'still':'roaming';lastRefresh=-Infinity;refresh();layoutDirty=false;wake()}
  });
- reduced.addEventListener('change',measure);addEventListener('resize',measure);addEventListener('scroll',refresh,{passive:true});new MutationObserver(measure).observe(document.documentElement,{attributes:true,attributeFilter:['data-motion']});
+ reduced.addEventListener('change',measure);addEventListener('resize',measure);addEventListener('scroll',scheduleRefresh,{passive:true});new MutationObserver(scheduleRefresh).observe(document.body,{attributes:true,attributeFilter:['class']});new MutationObserver(scheduleRefresh).observe(document.querySelector('#tracks'),{childList:true});new MutationObserver(scheduleRefresh).observe(document.querySelector('#dialog'),{attributes:true,attributeFilter:['open']});new MutationObserver(measure).observe(document.documentElement,{attributes:true,attributeFilter:['data-motion']});
  atlas.src='./assets/pixel-po/po-approved.png';
  atlas.decode().then(()=>{
   // Keep the original alpha, skin, outlines and yellow spots. Recolor only cobalt fabric.

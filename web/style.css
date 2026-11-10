@@ -156,3 +156,13 @@ html[data-paused=true] .track.ink-in-view .ink-letter{animation-play-state:pause
 html[data-motion=on]{animation:none;font-variation-settings:'BOIL' 1.4}
 html[data-motion=on] #view-title{animation:lpp-fluid-ink 4s ease-in-out infinite}
 html[data-paused=true] #view-title{animation-play-state:paused!important}
+
+/* Keep Korean comfortably readable and animate secondary text more lightly. */
+.ink-letter.ink-korean{-webkit-text-stroke:.2px currentColor}
+@keyframes ink-letter-drift{0%,100%{transform:translate3d(0,.15px,0) rotate(-.22deg)}50%{transform:translate3d(.18px,-.15px,0) rotate(.22deg)}}
+@media(max-width:930px){
+  html[data-motion=on] .ink-letter{display:inline-block;animation:ink-letter-drift 4s ease-in-out infinite}
+  html[data-motion=on] :is(.mobile-brand,#now-title,#mini-title,.track-title) .ink-letter{animation:ink-letter-boil 4s ease-in-out infinite}
+  html[data-motion=on] .track-bottom .glyph{animation:none}
+}
+@media(max-width:930px){html[data-motion=on] body.player-open .track .ink-letter{animation-play-state:paused!important}}
