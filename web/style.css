@@ -49,7 +49,7 @@ html[data-motion=off],html[data-motion=off] .glyph,html[data-motion=off] .ink-fr
 @media(max-width:650px){.intro{padding:20px 21px}.hero-content{min-height:138px;gap:6px}.intro h1{font-size:28px;margin:0 0 20px}.hero-art{width:112px;max-width:34%;margin:0 -5px 0 0}.hero-content .primary{font-size:10px;padding:10px 12px}.hero-content>div:first-child{max-width:70%}.empty{padding:30px 5px}.help-button{font-size:8px;max-width:100px}.player-open .turntable{margin-top:3px}.player-open .now-title{margin-top:0}.player-open .volume{margin-bottom:25px}.now-panel .now-heading{font-size:10px;letter-spacing:1px}}
 
 .upload-state{color:var(--accent);font-size:10px}.collection-actions:has(.upload-state:not([hidden])) #collection-info{display:none}.upload-state:not([hidden]){animation:upload-pulse 1s ease-in-out infinite alternate}@keyframes upload-pulse{to{opacity:.5}}
-@font-face{font-family:'LPP Po';src:url('fonts/PoVF.ttf') format('truetype');font-display:block;font-weight:100 500;font-style:normal}
+@font-face{font-family:'LPP Po';src:url('fonts/PoVF-ink.ttf') format('truetype');font-display:block;font-weight:100 500;font-style:normal}
 .povf-face{font-family:'LPP Po'!important;font-synthesis:none;font-variation-settings:'wdth' 100,'ital' 100,'slnt' 100,'opsz' 100,'yopq' 100,'wght' 100;animation:none!important;line-height:1}
 .feel-button{display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #38382f;color:var(--ink);border-radius:30px;padding:8px 18px;margin:23px auto 0;font-size:11px;min-height:43px}.feel-button .povf-face{font-size:29px;display:block;width:26px;height:26px;line-height:26px}
 .emotion-dialog{max-width:420px;padding:27px 23px}.feeling-heading h2{font-size:24px;margin-top:10px}.feeling-record{display:block;font-size:11px;color:var(--accent);padding-right:16px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.emotion-wheel{width:100%;aspect-ratio:1;position:relative;margin:23px auto 16px;max-width:330px}.emotion-pad{position:absolute;inset:9%;border-radius:50%;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;outline:1px solid #38382f;background:radial-gradient(circle,hsl(var(--emotion-hue,20) 60% 13%),#080808 72%);overflow:hidden}.emotion-pad:active{cursor:grabbing}.emotion-pad:focus-visible{outline:2px solid var(--accent);outline-offset:5px}.emotion-pad .povf-face{position:absolute;width:100%;text-align:center;left:50%;top:50%;transform:translate(-50%,-50%);font-size:236px;color:var(--ink);pointer-events:none}
@@ -122,3 +122,6 @@ html[data-paused=true]{animation-play-state:paused!important}
 
 /* Keep the variable ink moving while reducing whole-page repaints on phones. */
 @media(max-width:650px){html[data-motion=on]{animation-timing-function:steps(20,end)}}
+
+/* Use the handwritten Latin face alongside the existing Hangul ink font. */
+:root{font-family:'LPP Hand Ink','LPP Ink',serif}
