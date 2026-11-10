@@ -82,3 +82,5 @@
   .playing .mini-progress{background:#05050535}
   .playing .mini-progress i{background:#050505}
 }
+
+@media(max-width:650px){.track-feel .povf-face,.player-open #feel .povf-face{width:24px;height:24px;font-size:24px;line-height:24px;transform:translateY(-2px)}}

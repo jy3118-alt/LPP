@@ -134,3 +134,7 @@ html[data-motion=on] .track-feel,html[data-motion=on] #feel{animation:soft-ink-d
 html[data-paused=true] .track-feel,html[data-paused=true] #feel{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){html:not([data-motion=on]) .track-feel,html:not([data-motion=on]) #feel{animation:none}}
 .feel-icon .povf-face,.track-feel .povf-face{-webkit-text-stroke:.55px currentColor}
+
+/* Follow pointer position immediately; only the color eases between emotions. */
+.emotion-pad .povf-face{transition:color .16s linear}
+.track-feel .povf-face,#feel .povf-face{display:block;width:24px;height:24px;font-size:24px;line-height:24px;transform:translateY(-2px)}
