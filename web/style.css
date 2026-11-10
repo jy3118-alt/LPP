@@ -125,3 +125,12 @@ html[data-paused=true]{animation-play-state:paused!important}
 
 /* Use the handwritten Latin face alongside the existing Hangul ink font. */
 :root{font-family:'LPP Hand Ink','LPP Ink',serif}
+
+/* Softer ink contours and a line weight that holds up next to the other icons. */
+.povf-face{-webkit-text-stroke:.55px currentColor}
+.emotion-pad .povf-face{-webkit-text-stroke:.7px currentColor;filter:url(#feeling-ink)}
+.feeling-mini{-webkit-text-stroke:.7px currentColor}
+html[data-motion=on] .track-feel,html[data-motion=on] #feel{animation:soft-ink-drift 1.6s ease-in-out infinite}
+html[data-paused=true] .track-feel,html[data-paused=true] #feel{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){html:not([data-motion=on]) .track-feel,html:not([data-motion=on]) #feel{animation:none}}
+.feel-icon .povf-face,.track-feel .povf-face{-webkit-text-stroke:.55px currentColor}

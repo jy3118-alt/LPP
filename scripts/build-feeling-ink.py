@@ -5,8 +5,8 @@ from fontTools.ttLib import TTFont
 root=Path(__file__).resolve().parents[1]
 f=TTFont(root/'web/fonts/PoVF.ttf');g=f['glyf']['uni110B']
 for i,(x,y) in enumerate(g.coordinates):
- dx=3.8*sin(x*.035+y*.025)+1.5*sin(y*.08-x*.013)
- dy=3.4*sin(y*.033-x*.021)+1.3*sin(x*.09+y*.014)
+ dx=6*sin(x*.024+y*.020)+2*sin(y*.045-x*.013)
+ dy=5.5*sin(y*.023-x*.019)+2*sin(x*.046+y*.014)
  g.coordinates[i]=(round(x+dx),round(y+dy))
 g.recalcBounds(f['glyf'])
 for rec in f['name'].names:
