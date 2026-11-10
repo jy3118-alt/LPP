@@ -138,3 +138,6 @@ html[data-paused=true] .track-feel,html[data-paused=true] #feel{animation-play-s
 /* Follow pointer position immediately; only the color eases between emotions. */
 .emotion-pad .povf-face{transition:color .16s linear}
 .track-feel .povf-face,#feel .povf-face{display:block;width:24px;height:24px;font-size:24px;line-height:24px;transform:translateY(-2px)}
+
+/* The selected color tracks the finger directly; the color mapping itself is continuous. */
+.is-feeling-dragging .emotion-pad .povf-face,.is-feeling-dragging #emotion-label,.is-feeling-dragging #emotion-handle,.is-feeling-dragging #emotion-strength,.is-feeling-dragging #save-feeling{transition:none!important}
