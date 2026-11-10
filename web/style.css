@@ -124,7 +124,7 @@ html[data-paused=true]{animation-play-state:paused!important}
 @media(max-width:650px){html[data-motion=on]{animation-timing-function:steps(20,end)}}
 
 /* Use the handwritten Latin face alongside the existing Hangul ink font. */
-:root{font-family:'LPP Hand Ink','LPP Ink',serif}
+:root{font-family:'LPP Rough Ink','LPP Ink',serif}
 
 /* Softer ink contours and a line weight that holds up next to the other icons. */
 .povf-face{-webkit-text-stroke:.55px currentColor}
