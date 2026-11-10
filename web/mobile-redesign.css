@@ -71,3 +71,14 @@
   .player-open .ios-volume-note{font-size:9px;color:#777269}
 }
 @media(max-width:360px){.track-art{flex-basis:54px;width:54px;height:54px}.track{gap:9px}.track-title{font-size:15px}.track-bottom .icon{width:35px}.filter{padding:0 10px;font-size:11px}}
+
+@media(max-width:650px){
+  /* Give the handwritten logo room for its ascenders and slanted edges. */
+  header{overflow:visible}
+  .mobile-brand{display:inline-flex;align-items:center;overflow:visible;line-height:1.3;padding:.12em .18em .12em .04em;margin-left:-.04em}
+  .playing .mobile-player{background:var(--accent);border-color:var(--accent);color:#050505}
+  .playing .mini-info strong,.playing .mini-info>span,.playing .mobile-player .icon,.playing #mini-play{color:#050505}
+  .playing .mini-art{background:#16110e}
+  .playing .mini-progress{background:#05050535}
+  .playing .mini-progress i{background:#050505}
+}
