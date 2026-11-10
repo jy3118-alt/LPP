@@ -79,7 +79,7 @@ html[data-motion=off],html[data-motion=off] .glyph,html[data-motion=off] .ink-fr
 #reactive-record{position:fixed;inset:0;width:100vw;height:100dvh;aspect-ratio:auto;pointer-events:none;z-index:51;display:block}
 @media(max-width:930px){#reactive-record{display:none}.player-open #reactive-record{display:block}}
 .feeling-heading h2{margin-bottom:0}
-.feel-instruction{font-family:'LPP Ink',serif!important;font-size:11px!important;line-height:1.8!important;color:#97978b!important;margin:9px 0 13px!important;text-align:center}
+.feel-instruction{font-family:'LPP Wave Latin','LPP Wave Korean','LPP Ink',serif!important;font-size:11px!important;line-height:1.8!important;color:#97978b!important;margin:9px 0 13px!important;text-align:center}
 /* Transform-only ink motion: the variable font remains in use at one stable axis. */
 :root{animation:none;font-variation-settings:'BOIL' 1.4}
 .glyph{animation:soft-ink-drift 1.6s ease-in-out infinite;will-change:transform}
@@ -124,7 +124,7 @@ html[data-paused=true]{animation-play-state:paused!important}
 @media(max-width:650px){html[data-motion=on]{animation-timing-function:steps(20,end)}}
 
 /* Use the handwritten Latin face alongside the existing Hangul ink font. */
-:root{font-family:'LPP Rough Ink','LPP Ink',serif}
+:root{font-family:'LPP Wave Latin','LPP Wave Korean','LPP Ink',serif}
 
 /* Softer ink contours and a line weight that holds up next to the other icons. */
 .povf-face{-webkit-text-stroke:.55px currentColor}

@@ -2,12 +2,12 @@
 /* LPP pocket player: the same records and controls, arranged for a hand. */
 .header-settings{display:none}
 @media(max-width:650px){
-  body{font-family:'LPP Rough Ink','LPP Ink',serif;font-weight:600}
+  body{font-family:'LPP Wave Latin','LPP Wave Korean','LPP Ink',serif;font-weight:600}
   :root{--accent:#ff5a00;--ink:#f2ecdf;--muted:#a19c90}
   main{padding:0 20px calc(174px + env(safe-area-inset-bottom))}
   header{height:78px;padding-top:env(safe-area-inset-top);align-items:center}
   .mobile-brand{color:var(--accent);font-weight:700;font-size:50px;font-style:italic;letter-spacing:-3px;line-height:1}
-  .mobile-brand span,.help-button,.intro{display:none}
+  .mobile-brand>span:not(.ink-word),.help-button,.intro{display:none}
   .header-settings{display:grid;place-items:center;width:44px;height:44px;color:var(--ink);padding:0}
   .header-settings .glyph{width:25px;height:25px}
   .library{display:flex;flex-direction:column}
@@ -85,3 +85,6 @@
 
 @media(max-width:650px){.track-feel .povf-face,.player-open #feel .povf-face{width:24px;height:24px;font-size:24px;line-height:24px;transform:translateY(-2px)}}
 @media(max-width:650px){.mobile-brand{font-size:36px;line-height:1.35}#sort{width:112px}}
+
+/* Letter wrappers inherit the logo style without inheriting its subtitle style. */
+.brand .ink-word,.brand .ink-letter,.mobile-brand .ink-word,.mobile-brand .ink-letter{display:inline;font-size:inherit;letter-spacing:inherit;margin:0;color:inherit}
