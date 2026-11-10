@@ -151,3 +151,8 @@ html[data-motion=off] .ink-letter{animation:none;font-variation-settings:'BOIL' 
 html.ink-observed .track .ink-letter{animation-play-state:paused}
 html.ink-observed .track.ink-in-view .ink-letter{animation-play-state:running}
 html[data-paused=true] .track.ink-in-view .ink-letter{animation-play-state:paused!important}
+
+/* Animate visible letters independently without invalidating the whole page. */
+html[data-motion=on]{animation:none;font-variation-settings:'BOIL' 1.4}
+html[data-motion=on] #view-title{animation:lpp-fluid-ink 3.2s steps(8,end) infinite}
+html[data-paused=true] #view-title{animation-play-state:paused!important}
