@@ -9,7 +9,7 @@
   const anchor=document.querySelector('#cover');
   let context,analyser,silentOutput,bins,wave,previous,smoothedWave,frame=0,lastTime=0,phase=0,spin=0,visible=!document.hidden;
   let startingProbe=null,suspendingProbe=null,sourceNode=null,decodedBuffer=null,decodedURL='',decodeJob=null,sourceOffset=0,sourceTime=0,sourceRate=1;
-  let energy=0,bass=0,mid=0,high=0,brightness=0,texture=0,flux=0,hue=20,metricsTime=0;
+  let energy=0,bass=0,mid=0,high=0,brightness=0,texture=0,flux=0,hue=20,metricsTime=0,lastPaint=0;
   const layers=new Float32Array(10),targetLayers=new Float32Array(10);
   const contours=new WeakMap();
   const angles=new Map();
@@ -23,8 +23,22 @@
   function stopProbe(){if(sourceNode){try{sourceNode.stop();sourceNode.disconnect()}catch{}sourceNode=null}}
   function suspendProbe(){stopProbe();if(context&&context.state==='running'){const pending=context.suspend().catch(()=>{});suspendingProbe=pending;pending.finally(()=>{if(suspendingProbe===pending)suspendingProbe=null})}}
   function alignProbe(){if(!sourceNode||!context)return;const predicted=sourceOffset+(context.currentTime-sourceTime)*sourceRate;if(Math.abs(predicted-audio.currentTime)>.25){stopProbe();startProbe()}}
+  // Decode analysis audio at its final sample rate, not at the phone's much
+  // higher output rate. The real audio element remains completely independent.
+  async function decodeAnalysis(url){
+    async function bytes(){const response=await fetch(url);if(!response.ok)throw Error('No analysis audio');return response.arrayBuffer()}
+    const Offline=window.OfflineAudioContext||window.webkitOfflineAudioContext;let decoder=context;
+    try{if(Offline)decoder=new Offline(1,1,22050)}catch{}
+    let buffer;
+    try{buffer=await decoder.decodeAudioData(await bytes())}catch(error){if(decoder===context)throw error;buffer=await context.decodeAudioData(await bytes())}
+    if(buffer.numberOfChannels===1&&buffer.sampleRate===22050)return buffer;
+    const rate=22050,ratio=buffer.sampleRate/rate,mono=context.createBuffer(1,Math.ceil(buffer.length/ratio),rate),out=mono.getChannelData(0),left=buffer.getChannelData(0),right=buffer.getChannelData(Math.min(1,buffer.numberOfChannels-1));
+    for(let i=0;i<out.length;i++){const j=Math.min(buffer.length-1,Math.floor(i*ratio));out[i]=(left[j]+right[j])*.5}
+    return mono;
+  }
   async function startProbe(){
     if(startingProbe)return startingProbe;
+    const requestedURL=audio.currentSrc||audio.src;
     startingProbe=(async()=>{
       if(!context||!visible||audio.paused||!motion())return false;
       try{
@@ -32,7 +46,7 @@
         if(context.state!=='running')await context.resume();
         const url=audio.currentSrc||audio.src;if(!url)return false;
         if(decodedURL!==url){
-          if(!decodeJob||decodeJob.url!==url)decodeJob={url,promise:fetch(url).then(r=>{if(!r.ok)throw Error('No analysis audio');return r.arrayBuffer()}).then(bytes=>context.decodeAudioData(bytes)).then(buffer=>{const rate=22050,ratio=buffer.sampleRate/rate,mono=context.createBuffer(1,Math.ceil(buffer.length/ratio),rate),out=mono.getChannelData(0),left=buffer.getChannelData(0),right=buffer.getChannelData(Math.min(1,buffer.numberOfChannels-1));for(let i=0;i<out.length;i++){const j=Math.min(buffer.length-1,Math.floor(i*ratio));out[i]=(left[j]+right[j])*.5}return mono})};
+          if(!decodeJob||decodeJob.url!==url){decodedBuffer=null;decodedURL='';decodeJob={url,promise:decodeAnalysis(url)}};
           const buffer=await decodeJob.promise;
           if((audio.currentSrc||audio.src)!==url)return false;
           decodedBuffer=buffer;decodedURL=url;
@@ -44,7 +58,7 @@
         sourceNode.connect(analyser);sourceNode.start(0,sourceOffset);return true;
       }catch{decodeJob=null;if(status)status.textContent='A QUIET IMPRESSION';return false}
     })();
-    try{return await startingProbe}finally{startingProbe=null}
+    try{return await startingProbe}finally{startingProbe=null;const nowURL=audio.currentSrc||audio.src;if(requestedURL&&nowURL&&requestedURL!==nowURL&&visible&&!audio.paused&&motion())queueMicrotask(startProbe)}
   }
   async function unlock(){
     playbackSession();try{
@@ -129,7 +143,8 @@
     for(let i=0;i<10;i++)layers[i]=lerp(layers[i],motion()?targetLayers[i]:0,.12);
     hue=lerp(hue,21-brightness*10+bass*8+flux*2,.07);
     if(motion()){phase+=dt*(1.1+energy*4+flux*5);spin=(spin+dt*.12)%(Math.PI*2)}
-    paint();
+    const miniOnly=innerWidth<=930&&!document.body.classList.contains('player-open');
+    if(!miniOnly||now-lastPaint>=1000/30){paint();lastPaint=now}
     if(now-metricsTime>250){metricsTime=now;if(status)status.textContent=audio.paused?'READY TO RESONATE':!analyser?'A QUIET IMPRESSION':motion()?'SHAPED BY YOUR SOUND':'A STILL IMPRESSION'}
     if(motion()||energy>.001)frame=requestAnimationFrame(loop);
   }
