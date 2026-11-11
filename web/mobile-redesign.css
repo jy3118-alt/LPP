@@ -88,3 +88,17 @@
 
 /* Letter wrappers inherit the logo style without inheriting its subtitle style. */
 .brand .ink-word,.brand .ink-letter,.mobile-brand .ink-word,.mobile-brand .ink-letter{display:inline;font-size:inherit;letter-spacing:inherit;margin:0;color:inherit}
+
+/* Keep the feeling and heart at a common visual center and scale. */
+.now-title{column-gap:0}
+.now-title>div{margin-right:7px}
+.now-title #now-like,.now-title #feel{width:38px;height:44px;padding:0;display:grid;place-items:center;position:relative}
+.now-title #now-like{top:-1px}
+.now-title #now-like .glyph{width:24px;height:24px}
+.now-title #feel .povf-face{width:20px;height:20px;font-size:19px;line-height:20px;transform:translateY(-1px)}
+.track-bottom .track-feel .povf-face{width:17px;height:17px;font-size:16px;line-height:17px;transform:translateY(-1px)}
+@media(max-width:650px){
+ .player-open .now-title #now-like,.player-open .now-title #feel{width:38px;height:44px}
+ .player-open .now-title #feel .povf-face{width:20px;height:20px;font-size:19px;line-height:20px}
+ .track-bottom .track-feel .povf-face{width:20px;height:20px;font-size:19px;line-height:20px}
+}
