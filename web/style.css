@@ -166,3 +166,8 @@ html[data-paused=true] #view-title{animation-play-state:paused!important}
   html[data-motion=on] .track-bottom .glyph{animation:none}
 }
 @media(max-width:930px){html[data-motion=on] body.player-open .track .ink-letter{animation-play-state:paused!important}}
+
+/* Keep every visible letter moving while limiting expensive outline redraws. */
+html[data-motion=on] .ink-letter{display:inline-block;animation:ink-letter-drift 4s ease-in-out infinite}
+html[data-motion=on] :is(.brand,.mobile-brand,#now-title,#mini-title,.track.current .track-title) .ink-letter{animation:ink-letter-boil 4s ease-in-out infinite}
+.glyph{will-change:auto}
