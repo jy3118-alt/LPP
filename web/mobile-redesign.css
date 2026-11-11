@@ -95,10 +95,10 @@
 .now-title #now-like,.now-title #feel{width:38px;height:44px;padding:0;display:grid;place-items:center;position:relative}
 .now-title #now-like{top:-1px}
 .now-title #now-like .glyph{width:24px;height:24px}
-.now-title #feel .povf-face{width:20px;height:20px;font-size:19px;line-height:20px;transform:translateY(-1px)}
-.track-bottom .track-feel .povf-face{width:17px;height:17px;font-size:16px;line-height:17px;transform:translateY(-1px)}
+.now-title #feel .povf-face{width:20px;height:20px;font-size:19.95px;line-height:20px;transform:translateY(-1px)}
+.track-bottom .track-feel .povf-face{width:17px;height:17px;font-size:16.8px;line-height:17px;transform:translateY(-1px)}
 @media(max-width:650px){
  .player-open .now-title #now-like,.player-open .now-title #feel{width:38px;height:44px}
- .player-open .now-title #feel .povf-face{width:20px;height:20px;font-size:19px;line-height:20px}
- .track-bottom .track-feel .povf-face{width:20px;height:20px;font-size:19px;line-height:20px}
+ .player-open .now-title #feel .povf-face{width:20px;height:20px;font-size:19.95px;line-height:20px}
+ .track-bottom .track-feel .povf-face{width:20px;height:20px;font-size:19.95px;line-height:20px}
 }
